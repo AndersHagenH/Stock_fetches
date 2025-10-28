@@ -1,1 +1,36 @@
+name: Update 3-day scan
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"  # every 10 minutes (UTC)
+  workflow_dispatch:         # allows manual run
+
+jobs:
+  run-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install yfinance pandas numpy requests
+
+      - name: Run scanner
+        run: python Stock_fetches.py   # use your exact Python filename here
+
+      - name: Commit and push results
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add public/data/*.json public/data/*.csv || true
+          git commit -m "Auto-update scan data" || echo "No changes to commit"
+          git push
 
