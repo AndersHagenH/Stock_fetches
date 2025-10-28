@@ -1,0 +1,100 @@
+[
+  {
+    "Ticker":"GJF.OL",
+    "3D_Return":-0.0306486312,
+    "Signal":"BUY",
+    "LastPrice":171.6000061035,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"MING.OL",
+    "3D_Return":-0.0136500734,
+    "Signal":"HOLD",
+    "LastPrice":259.8999938965,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"KID.OL",
+    "3D_Return":-0.0112835407,
+    "Signal":"HOLD",
+    "LastPrice":102.5999984741,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"SB1NO.OL",
+    "3D_Return":-0.0045977187,
+    "Signal":"HOLD",
+    "LastPrice":272.0,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"SBNOR.OL",
+    "3D_Return":-0.0023672538,
+    "Signal":"HOLD",
+    "LastPrice":140.1999969482,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"ORK.OL",
+    "3D_Return":0.0,
+    "Signal":"HOLD",
+    "LastPrice":189.3200073242,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"STB.OL",
+    "3D_Return":0.0,
+    "Signal":"HOLD",
+    "LastPrice":104.7799987793,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"DNB.OL",
+    "3D_Return":0.0,
+    "Signal":"HOLD",
+    "LastPrice":140.6000061035,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"VEI.OL",
+    "3D_Return":0.0,
+    "Signal":"HOLD",
+    "LastPrice":106.1999969482,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"EPR.OL",
+    "3D_Return":0.0039139094,
+    "Signal":"HOLD",
+    "LastPrice":462.5,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"PROT.OL",
+    "3D_Return":0.0064034438,
+    "Signal":"HOLD",
+    "LastPrice":173.1999969482,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"MORG.OL",
+    "3D_Return":0.0094411917,
+    "Signal":"HOLD",
+    "LastPrice":177.0,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"NONG.OL",
+    "3D_Return":0.0112198856,
+    "Signal":"HOLD",
+    "LastPrice":159.3999938965,
+    "Date":"2025-10-28 14:15 UTC"
+  },
+  {
+    "Ticker":"AFG.OL",
+    "3D_Return":0.0141844515,
+    "Signal":"HOLD",
+    "LastPrice":158.3999938965,
+    "Date":"2025-10-28 14:15 UTC"
+  }
+]
