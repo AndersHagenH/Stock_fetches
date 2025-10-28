@@ -24,7 +24,7 @@ jobs:
         run: pip install yfinance pandas numpy requests
 
       - name: Run scanner
-        run: python Stock_fetches.py   # use your exact Python filename here
+        run: python Stockfetches.py   # use your exact Python filename here
 
       - name: Commit and push results
         run: |
