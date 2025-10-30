@@ -1,1 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Stock Fetches</title>
+  </head>
+  <body>
+    <h1>Stock Fetches</h1>
+    <p>Data files are available <a href="public/data/scan_3day.csv">here</a>.</p>
 
+    <script>
+      // Example: Fetch and log your data
+      fetch('public/data/scan_3day.json')
+        .then(response => response.json())
+        .then(data => console.log('Loaded JSON data:', data))
+        .catch(err => console.error('Error loading JSON:', err));
+
+      fetch('public/data/scan_3day.csv')
+        .then(response => response.text())
+        .then(text => console.log('Loaded CSV data:', text))
+        .catch(err => console.error('Error loading CSV:', err));
+    </script>
+  </body>
+</html>
