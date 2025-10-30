@@ -1,47 +1,223 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Stock Fetches</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Squarepoint Strategies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
-    h1 { margin: 0 0 8px; }
-    .muted { color: #555; }
-    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-top: 24px; }
-    .chart-wrap { height: 320px; }
+    :root {
+      color-scheme: light;
+      --bg-gradient: radial-gradient(circle at top, #0e1f4d 0%, #020817 50%, #010513 100%);
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --accent: #33e2a0;
+      --text: #f8fbff;
+      --muted: rgba(248, 251, 255, 0.68);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;display:flex;flex-direction:column;
+      font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:var(--bg-gradient);color:var(--text)
+    }
+    header{padding:24px 8vw;display:flex;align-items:center;justify-content:space-between}
+    .logo{font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.95rem}
+    nav{display:flex;gap:24px;font-size:.95rem}
+    nav a{color:var(--muted);text-decoration:none}
+    nav a:hover{color:var(--text)}
+
+    /* Two-column layout aligned with the header padding */
+    main{
+      flex:1;
+      display:grid;
+      grid-template-columns:minmax(320px,720px) 1fr;
+      gap:48px;
+      padding:0 8vw 10vh;
+    }
+
+    .eyebrow{display:inline-flex;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(51,226,160,.12);border:1px solid rgba(51,226,160,.32);color:var(--accent);font-size:.78rem;letter-spacing:.14em;margin-bottom:18px;text-transform:uppercase}
+    h1{font-size:clamp(2.2rem,4vw,3.8rem);line-height:1.1;margin:0 0 18px}
+    p{color:var(--muted);font-size:1.05rem;max-width:560px}
+    .card{
+      padding:24px;border-radius:20px;border:1px solid var(--card-border);
+      background:linear-gradient(160deg,rgba(14,31,77,.72),rgba(2,8,23,.86));
+      backdrop-filter:blur(10px)
+    }
+    .table-wrap{width:100%;overflow-x:auto;margin-top:10px}
+    table{border-collapse:collapse;width:100%;font-size:.95rem}
+    th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left}
+    th{background:rgba(255,255,255,.06)}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:600;font-size:.82rem}
+    .buy{background:rgba(51,226,160,.24);border:1px solid rgba(51,226,160,.6);color:var(--text)}
+    .hold{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--text)}
+    footer{padding:36px 8vw 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
+
+    /* Responsive: stack columns on smaller screens */
+    @media (max-width:1024px){
+      main{grid-template-columns:1fr}
+    }
+    @media (max-width:640px){
+      main{gap:28px;padding-bottom:64px}
+    }
   </style>
 </head>
 <body>
-  <h1>Stock Fetches</h1>
-  <p>Data files are available <a href="public/data/scan_3day.csv">here</a>.</p>
+  <header>
+    <div class="logo">Squarepoint</div>
+    <nav>
+      <a href="#signals">Signals</a>
+      <a href="#osebx">OSEBX</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
 
-  <div class="card">
-    <h2 style="margin:0 0 6px;">OSEBX (1y)</h2>
-    <div id="osebx-meta" class="muted">Loading…</div>
-    <div class="chart-wrap">
-      <canvas id="osebx-chart"></canvas>
-    </div>
-    <div class="muted" style="font-size:.9rem; margin-top:6px;">Data source: Yahoo Finance</div>
-  </div>
+  <main>
+    <!-- LEFT COLUMN -->
+    <section>
+      <div class="eyebrow">Daily stock picks on Euronext Oslo</div>
+      <h1>Daily stock picks</h1>
+      <p>The strategy flags a BUY when a stock’s 3-day return is ≤ −3%; otherwise HOLD.</p>
 
-  <!-- Your existing fetches (unchanged) -->
+      <aside class="card" id="signals" style="margin-top:40px;">
+        <h2 style="margin:0 0 8px">Today’s Signals</h2>
+        <div id="meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
+        <div class="table-wrap">
+          <table aria-label="3-day signals">
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th>Last Price</th>
+                <th>3-Day Return</th>
+                <th>Signal</th>
+                <th>As of</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr><td colspan="5">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </aside>
+    </section>
+
+    <!-- RIGHT COLUMN -->
+    <aside class="card" id="osebx">
+      <h2 style="margin:0 0 8px">OSEBX (1y)</h2>
+      <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
+      <div style="height:320px;margin-top:8px">
+        <canvas id="osebx-chart"></canvas>
+      </div>
+      <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
+    </aside>
+  </main>
+
+  <footer id="about">
+    © 2025 Squarepoint · Data auto-updated by GitHub Actions
+  </footer>
+
   <script>
-    fetch('public/data/scan_3day.json')
-      .then(response => response.json())
-      .then(data => console.log('Loaded JSON data:', data))
-      .catch(err => console.error('Error loading JSON:', err));
+    // Detect where we’re running:
+    // - If hosted at your GitHub Pages project (/Stock_fetches/), use relative paths.
+    // - Otherwise (local dev server or another site), use the absolute GitHub Pages URL.
+    const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
+    const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
 
-    fetch('public/data/scan_3day.csv')
-      .then(response => response.text())
-      .then(text => console.log('Loaded CSV data:', text))
-      .catch(err => console.error('Error loading CSV:', err));
+    // Signals sources
+    const JSON_URL = BASE + 'public/data/scan_3day.json';
+    const CSV_URL  = BASE + 'public/data/scan_3day.csv';
+
+    const metaEl = document.getElementById('meta');
+    const tbody  = document.getElementById('rows');
+
+    // Robust parsing for strings like "2025-10-30 11:11 UTC" (Safari-safe)
+    function parseUTC(s) {
+      if (typeof s !== 'string') return new Date(s);
+      const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/);
+      return m ? new Date(`${m[1]}T${m[2]}:${m[3]}:00Z`) : new Date(s);
+    }
+    const fmtDate = s =>
+      new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short' })
+        .format(parseUTC(s));
+
+    const fmtPct = x => Number.isFinite(+x) ? ((+x) * 100).toFixed(2) + '%' : '—';
+    const fmtPx  = x => Number.isFinite(+x) ? (+x).toFixed(4) : '—';
+
+    function renderRows(rows) {
+      if (!Array.isArray(rows) || rows.length === 0) {
+        metaEl.textContent = '';
+        tbody.innerHTML = `<tr><td colspan="5">No data</td></tr>`;
+        return;
+      }
+      rows.sort((a,b) => (a["3D_Return"] ?? 9e9) - (b["3D_Return"] ?? 9e9));
+      metaEl.textContent = rows[0].Date ? `As of ${fmtDate(rows[0].Date)}` : '';
+
+      tbody.innerHTML = rows.map(r => {
+        const lastPrice = fmtPx(r.LastPrice);
+        const ret3d     = fmtPct(r["3D_Return"]);
+        const signalRaw = (r.Signal || '').toUpperCase();
+        const signalCls = signalRaw === 'BUY' ? 'buy' : 'hold';
+        const asOf      = r.Date ? fmtDate(r.Date) : '—';
+        return `
+          <tr>
+            <td>${r.Ticker}</td>
+            <td>${lastPrice}</td>
+            <td>${ret3d}</td>
+            <td><span class="badge ${signalCls}">${signalRaw}</span></td>
+            <td>${asOf}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // Minimal CSV parser (simple, no quoted commas needed for your file)
+    function parseCSV(text) {
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines.shift().split(',').map(h => h.trim());
+      return lines.map(line => {
+        const parts = line.split(',').map(v => v.trim());
+        const row = {};
+        headers.forEach((h,i) => row[h] = parts[i] ?? '');
+        if ('3D_Return' in row) row['3D_Return'] = Number(row['3D_Return']);
+        if ('LastPrice' in row) row['LastPrice'] = Number(row['LastPrice']);
+        return row;
+      });
+    }
+
+    async function loadSignals() {
+      try {
+        const r = await fetch(`${JSON_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!r.ok) throw new Error(`JSON HTTP ${r.status}`);
+        const rows = await r.json();
+        renderRows(rows);
+        return;
+      } catch (e) {
+        console.warn('JSON failed, falling back to CSV:', e);
+      }
+
+      try {
+        const r = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!r.ok) throw new Error(`CSV HTTP ${r.status}`);
+        const text = await r.text();
+        renderRows(parseCSV(text));
+      } catch (e) {
+        console.error(e);
+        metaEl.textContent = 'Failed to load';
+        tbody.innerHTML = `<tr><td colspan="5" style="color:#f88">Fetch error: ${String(e)}</td></tr>`;
+      }
+    }
+
+    loadSignals();
+    setInterval(loadSignals, 60_000); // refresh every minute
   </script>
 
   <!-- Chart.js for the OSEBX line chart -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
-    const OSEBX_URL = 'public/data/osebx.json'; // served by GitHub Pages from your repo
+    // OSEBX JSON produced by your workflow
+    const OSEBX_URL = BASE + 'public/data/osebx.json';
 
     async function loadOsebx() {
       const meta = document.getElementById('osebx-meta');
@@ -52,7 +228,6 @@
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const data = await r.json();
 
-        // data.rows: [{ t: "YYYY-MM-DD", close: number }, ...]
         const labels = data.rows.map(p => p.t);
         const closes = data.rows.map(p => p.close);
 
@@ -75,7 +250,7 @@
             maintainAspectRatio: false,
             scales: {
               x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } },
-              y: { grid: { color: 'rgba(0,0,0,0.08)' } }
+              y: { grid: { color: 'rgba(255,255,255,0.12)' } }
             },
             plugins: { legend: { display: false }, tooltip: { intersect: false, mode: 'index' } }
           }
