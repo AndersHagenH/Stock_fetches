@@ -1,24 +1,92 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Stock Fetches</title>
-  </head>
-  <body>
-    <h1>Stock Fetches</h1>
-    <p>Data files are available <a href="public/data/scan_3day.csv">here</a>.</p>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Stock Fetches</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
+    h1 { margin: 0 0 8px; }
+    .muted { color: #555; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin-top: 24px; }
+    .chart-wrap { height: 320px; }
+  </style>
+</head>
+<body>
+  <h1>Stock Fetches</h1>
+  <p>Data files are available <a href="public/data/scan_3day.csv">here</a>.</p>
 
-    <script>
-      // Example: Fetch and log your data
-      fetch('public/data/scan_3day.json')
-        .then(response => response.json())
-        .then(data => console.log('Loaded JSON data:', data))
-        .catch(err => console.error('Error loading JSON:', err));
+  <div class="card">
+    <h2 style="margin:0 0 6px;">OSEBX (1y)</h2>
+    <div id="osebx-meta" class="muted">Loading…</div>
+    <div class="chart-wrap">
+      <canvas id="osebx-chart"></canvas>
+    </div>
+    <div class="muted" style="font-size:.9rem; margin-top:6px;">Data source: Yahoo Finance</div>
+  </div>
 
-      fetch('public/data/scan_3day.csv')
-        .then(response => response.text())
-        .then(text => console.log('Loaded CSV data:', text))
-        .catch(err => console.error('Error loading CSV:', err));
-    </script>
-  </body>
+  <!-- Your existing fetches (unchanged) -->
+  <script>
+    fetch('public/data/scan_3day.json')
+      .then(response => response.json())
+      .then(data => console.log('Loaded JSON data:', data))
+      .catch(err => console.error('Error loading JSON:', err));
+
+    fetch('public/data/scan_3day.csv')
+      .then(response => response.text())
+      .then(text => console.log('Loaded CSV data:', text))
+      .catch(err => console.error('Error loading CSV:', err));
+  </script>
+
+  <!-- Chart.js for the OSEBX line chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    const OSEBX_URL = 'public/data/osebx.json'; // served by GitHub Pages from your repo
+
+    async function loadOsebx() {
+      const meta = document.getElementById('osebx-meta');
+      const ctx  = document.getElementById('osebx-chart').getContext('2d');
+
+      try {
+        const r = await fetch(`${OSEBX_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+
+        // data.rows: [{ t: "YYYY-MM-DD", close: number }, ...]
+        const labels = data.rows.map(p => p.t);
+        const closes = data.rows.map(p => p.close);
+
+        meta.textContent = `As of ${data.as_of} (source: ${data.ticker})`;
+
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'OSEBX',
+              data: closes,
+              tension: 0.25,
+              borderWidth: 2,
+              pointRadius: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } },
+              y: { grid: { color: 'rgba(0,0,0,0.08)' } }
+            },
+            plugins: { legend: { display: false }, tooltip: { intersect: false, mode: 'index' } }
+          }
+        });
+      } catch (e) {
+        meta.textContent = 'Failed to load OSEBX.';
+        console.error(e);
+      }
+    }
+
+    loadOsebx();
+  </script>
+</body>
 </html>
