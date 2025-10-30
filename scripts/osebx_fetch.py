@@ -1,73 +1,95 @@
 # scripts/osebx_fetch.py
-# Fetch 1y of daily OSEBX index data from Yahoo and write to public/data/osebx.json
+# Fetch 1y of daily OSEBX index data from Yahoo's public chart API
+# and write to public/data/osebx.json (date + close).
 
-import os
-import json
-import datetime as dt
+import os, json, time
+from datetime import datetime, timezone
+from urllib.request import Request, urlopen
+from urllib.error import URLError, HTTPError
 
+CANDIDATES = ["OSEBX.OL", "^OSEBX"]  # try both symbols
+RANGE = "1y"
+INTERVAL = "1d"
 
-def fetch_series(ticker: str):
-    """
-    Return [{"t": "YYYY-MM-DD", "close": float}, ...] for the given Yahoo ticker.
-    """
-    import yfinance as yf
+UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/124.0.0.0 Safari/537.36"
+)
 
-    # Use download() to avoid some Ticker() quirks on indexes
-    df = yf.download(
-        tickers=ticker,
-        period="1y",
-        interval="1d",
-        auto_adjust=False,
-        progress=False,
-        threads=False,
+def yahoo_chart_url(symbol: str) -> str:
+    return (
+        f"https://query1.finance.yahoo.com/v8/finance/chart/"
+        f"{symbol}?range={RANGE}&interval={INTERVAL}&includePrePost=false"
     )
 
-    if df is None or len(df) == 0:
-        raise RuntimeError(f"No data for {ticker}")
+def http_get_json(url: str) -> dict:
+    # simple GET with headers + small retry loop
+    last_err = None
+    for attempt in range(4):
+        try:
+            req = Request(url, headers={"User-Agent": UA, "Accept": "application/json"})
+            with urlopen(req, timeout=20) as resp:
+                data = resp.read()
+            return json.loads(data.decode("utf-8"))
+        except (HTTPError, URLError, json.JSONDecodeError) as e:
+            last_err = e
+            # brief backoff
+            time.sleep(1.5 * (attempt + 1))
+    raise RuntimeError(f"GET failed for {url}: {last_err}")
 
-    # Accept either 'Close' (download) or 'Adj Close' in odd cases
-    close_col = "Close" if "Close" in df.columns else "Adj Close"
-    if close_col not in df.columns:
-        raise RuntimeError(f"Expected Close/Adj Close column missing for {ticker}")
+def fetch_rows(symbol: str):
+    """Return list of {'t': 'YYYY-MM-DD', 'close': float}."""
+    url = yahoo_chart_url(symbol)
+    raw = http_get_json(url)
 
-    df = df.reset_index()[["Date", close_col]]
-    rows = [
-        {"t": d.strftime("%Y-%m-%d"), "close": float(c)}
-        for d, c in zip(df["Date"], df[close_col])
-        if c == c  # drop NaNs
-    ]
+    chart = raw.get("chart", {})
+    error = chart.get("error")
+    if error:
+        raise RuntimeError(f"Yahoo returned error for {symbol}: {error}")
+
+    results = chart.get("result") or []
+    if not results:
+        raise RuntimeError(f"No result section for {symbol}")
+
+    r0 = results[0]
+    ts = r0.get("timestamp") or []
+    quotes = ((r0.get("indicators") or {}).get("quote") or [{}])[0]
+    closes = quotes.get("close") or []
+
+    rows = []
+    for t, c in zip(ts, closes):
+        if c is None:
+            continue
+        # timestamps are seconds since epoch (UTC)
+        d = datetime.fromtimestamp(t, tz=timezone.utc).strftime("%Y-%m-%d")
+        rows.append({"t": d, "close": float(c)})
+
     if not rows:
-        raise RuntimeError(f"Only empty/NaN rows for {ticker}")
+        raise RuntimeError(f"No valid rows for {symbol}")
 
     return rows
 
-
 def main():
-    # Try common Yahoo symbols for the Oslo Børs Benchmark Index.
-    # OSEBX.OL works locally sometimes; ^OSEBX tends to work better in CI.
-    candidates = ["OSEBX.OL", "^OSEBX", "^OSEAX"]
-
-    rows = None
-    source = None
     last_err = None
-
-    for sym in candidates:
+    for sym in CANDIDATES:
         try:
-            print(f"Attempting to fetch: {sym}")
-            rows = fetch_series(sym)
+            print(f"Attempting Yahoo chart API for {sym}")
+            rows = fetch_rows(sym)
             source = sym
-            print(f"Fetched {len(rows)} points from {sym}")
+            print(f"Fetched {len(rows)} rows from {sym}")
             break
         except Exception as e:
-            print(f"Failed to fetch {sym}: {e}")
+            print(f"Failed for {sym}: {e}")
+            rows = None
             last_err = e
 
     if rows is None:
-        raise RuntimeError(f"Failed to fetch OSEBX data from all candidates: {candidates}. Last error: {last_err}")
+        raise RuntimeError(f"Failed to fetch OSEBX data via Yahoo for {CANDIDATES}. Last error: {last_err}")
 
     out = {
         "ticker": source,
-        "as_of": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
+        "as_of": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
         "rows": rows,
     }
 
@@ -77,7 +99,6 @@ def main():
         json.dump(out, f, ensure_ascii=False)
 
     print(f"Wrote {out_path} with {len(rows)} points (source: {source})")
-
 
 if __name__ == "__main__":
     main()
