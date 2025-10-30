@@ -10,21 +10,12 @@ def fetch_series(ticker: str):
     return rows
 
 def main():
-    # OSEBX is usually ^OSEBX on Yahoo; ^OSEAX as fallback.
-    rows = None
-    last_err = None
-    for sym in ["^OSEBX", "^OSEAX"]:
-        try:
-            rows = fetch_series(sym)
-            source = sym
-            break
-        except Exception as e:
-            last_err = e
-    if rows is None:
-        raise last_err
+    # Correct Yahoo Finance ticker for the Oslo Børs Benchmark Index
+    sym = "OSEBX.OL"
+    rows = fetch_series(sym)
 
     out = {
-        "ticker": source,
+        "ticker": sym,
         "as_of": dt.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
         "rows": rows,
     }
@@ -33,7 +24,7 @@ def main():
     with open("public/data/osebx.json", "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False)
 
-    print(f"Wrote public/data/osebx.json with {len(rows)} points (source: {source})")
+    print(f"Wrote public/data/osebx.json with {len(rows)} points (source: {sym})")
 
 if __name__ == "__main__":
     main()
