@@ -5,7 +5,7 @@ on:
     - cron: "15 12 * * 1-5"   # Weekdays ~12:15 UTC
   workflow_dispatch: {}        # Allow manual runs
 
-# Grant write permission ONLY for this workflow (repo default can stay read-only)
+# Grant write permission ONLY for this workflow (repo-wide default can stay read-only)
 permissions:
   contents: write
 
@@ -34,21 +34,28 @@ jobs:
           python scripts/osebx_fetch.py
 
       - name: Commit & push data
+        if: ${{ hashFiles('public/data/osebx.json') != '' }}
         run: |
           set -euo pipefail
+
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Stage ONLY osebx.json
+          # Stage ONLY the expected file
           git add --force public/data/osebx.json
 
-          # Guard: fail if anything else is staged
+          # Guard: abort if anything else is staged
           if git diff --name-only --staged | grep -v '^public/data/osebx\.json$' ; then
-            echo "Unexpected files staged; aborting."
+            echo "Unexpected files staged; aborting push."
             git reset --hard
             exit 1
           fi
 
           # Commit only if there are changes
-          git commit -m "Update OSEBX time series" || exit 0
-          git push
+          git commit -m "Update OSEBX time series" || { echo "No changes to commit"; exit 0; }
+
+          # Rebase on latest main to avoid 'fetch first' rejection
+          git pull --rebase origin main
+
+          # Push the update
+          git push origin HEAD:main
