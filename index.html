@@ -83,6 +83,7 @@
       <h1>Daily stock picks</h1>
       <p>Strategy provided by Mr. Bert.</p>
 
+      <!-- SIGNALS CARD -->
       <aside class="card" id="signals" style="margin-top:40px;">
         <h2 style="margin:0 0 8px">Today’s Signals</h2>
         <div id="meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
@@ -103,10 +104,37 @@
           </table>
         </div>
       </aside>
+
+      <!-- NEW: PORTFOLIO HOLDINGS CARD (under Signals) -->
+      <aside class="card" id="holdings-card" style="margin-top:20px;">
+        <h2 style="margin:0 0 8px">
+          Portfolio Holdings
+          <span id="nav-pill" class="badge hold" style="margin-left:8px">
+            NAV: <span id="nav-number">—</span> NOK
+          </span>
+        </h2>
+        <div id="holdings" class="table-wrap">
+          <table aria-label="Current holdings">
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th>Qty</th>
+                <th>Entry</th>
+                <th>Last</th>
+                <th>P&amp;L (NOK)</th>
+                <th>P&amp;L (%)</th>
+              </tr>
+            </thead>
+            <tbody id="holdings-rows">
+              <tr><td colspan="6">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </aside>
     </section>
 
     <!-- RIGHT COLUMN -->
-    <!-- OSEBX CARD (unchanged layout) -->
+    <!-- OSEBX CARD -->
     <aside class="card" id="osebx">
       <h2 style="margin:0 0 8px">OSEBX (1y)</h2>
       <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
@@ -116,32 +144,12 @@
       <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
     </aside>
 
-    <!-- PORTFOLIO CARD (separate chart + holdings) -->
+    <!-- PORTFOLIO CARD (chart only; holdings moved to left column) -->
     <aside class="card" id="portfolio" style="align-self:start;">
       <h2 style="margin:0 0 8px">Portfolio NAV</h2>
       <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
       <div style="height:320px;margin-top:8px">
         <canvas id="portfolio-chart"></canvas>
-      </div>
-
-      <!-- Holdings (hidden if no positions) -->
-      <div id="holdings" class="table-wrap" style="display:none">
-        <h3>Current Holdings</h3>
-        <table aria-label="Current holdings">
-          <thead>
-            <tr>
-              <th>Ticker</th>
-              <th>Qty</th>
-              <th>Entry</th>
-              <th>Last</th>
-              <th>P&amp;L (NOK)</th>
-              <th>P&amp;L (%)</th>
-            </tr>
-          </thead>
-          <tbody id="holdings-rows">
-            <tr><td colspan="6">Loading…</td></tr>
-          </tbody>
-        </table>
       </div>
     </aside>
   </main>
@@ -176,6 +184,9 @@
     const fmtPct  = x => Number.isFinite(+x) ? ((+x) * 100).toFixed(2) + '%' : '—';
     const fmtPx   = x => Number.isFinite(+x) ? (+x).toFixed(4) : '—';
     const fmtQty  = x => Number.isFinite(+x) ? (+x).toFixed(6) : '—';
+    const fmtNok  = x => Number.isFinite(+x)
+      ? (+x).toLocaleString('en-GB',{ minimumFractionDigits:2, maximumFractionDigits:2 })
+      : '—';
 
     // expose scan rows globally so holdings code can use last prices
     window.latestScanRows = [];
@@ -220,11 +231,30 @@
       });
     }
 
+    async function updateNavNumber(){
+      try{
+        const r = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
+        if(!r.ok) return;
+        const arr = await r.json(); // [{date, nav}]
+        if(Array.isArray(arr) && arr.length){
+          const lastNav = +arr[arr.length - 1].nav;
+          const el = document.getElementById('nav-number');
+          if(el) el.textContent = fmtNok(lastNav);
+        }
+      }catch(e){
+        /* no-op */
+      }
+    }
+
     async function loadSignals(){
       try{
         const r = await fetch(`${JSON_URL}?t=${Date.now()}`, { cache:'no-store' });
         if (!r.ok) throw new Error(`JSON HTTP ${r.status}`);
-        renderRows(await r.json());
+        const rows = await r.json();
+        renderRows(rows);
+        // also refresh holdings and the NAV badge after signals are loaded
+        loadHoldings();
+        updateNavNumber();
         return;
       }catch(e){
         console.warn('JSON failed, falling back to CSV:', e);
@@ -234,6 +264,8 @@
         if (!r.ok) throw new Error(`CSV HTTP ${r.status}`);
         const text = await r.text();
         renderRows(parseCSV(text));
+        loadHoldings();
+        updateNavNumber();
       }catch(e){
         console.error(e);
         metaEl.textContent = 'Failed to load';
@@ -241,6 +273,42 @@
       }
     }
 
+    // Build holdings table (left card). Uses latest scan prices when available
+    async function loadHoldings(){
+      const wrap  = document.getElementById('holdings');
+      const tbody = document.getElementById('holdings-rows');
+      if(!wrap || !tbody) return;
+      try{
+        const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache:'no-store' });
+        if(!r.ok){ wrap.style.display='none'; return; }
+        const state = await r.json();
+        const positions = state.positions || {};
+        const tickers = Object.keys(positions);
+        if(!tickers.length){ wrap.style.display='none'; return; }
+
+        const lastByTicker = new Map((window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)]));
+
+        tbody.innerHTML = tickers.map(t=>{
+          const p=positions[t], qty=+p.qty, entry=+p.entry_price, last=+(lastByTicker.get(t)??entry);
+          const stake=+(p.stake_nok ?? qty*entry);
+          const plNok = qty*last - stake;
+          const plPct = stake ? (plNok/stake) : 0;
+          return `<tr>
+            <td>${t}</td>
+            <td>${fmtQty(qty)}</td>
+            <td>${fmtPx(entry)}</td>
+            <td>${fmtPx(last)}</td>
+            <td>${fmtNok(plNok)}</td>
+            <td>${(plPct*100).toFixed(2)}%</td>
+          </tr>`;
+        }).join('');
+        wrap.style.display='';
+      }catch(e){
+        wrap.style.display='none';
+      }
+    }
+
+    // Initial load + periodic refresh
     loadSignals();
     setInterval(loadSignals, 60_000);
   </script>
@@ -285,7 +353,7 @@
       }
     }
 
-    // Draw Portfolio NAV in its own chart/card and show holdings table
+    // Draw Portfolio NAV in its own chart/card (holdings now handled on the left)
     async function drawPortfolio(){
       const meta = document.getElementById('portfolio-meta');
       const ctx  = document.getElementById('portfolio-chart').getContext('2d');
@@ -316,51 +384,13 @@
             plugins:{ legend:{display:true}, tooltip:{intersect:false,mode:'index'} }
           }
         });
-
-        // Build holdings table after the chart draws
-        loadHoldings();
       }catch(e){
         meta.textContent = 'No portfolio data';
-        // Hide holdings if no state yet
-        document.getElementById('holdings').style.display = 'none';
         console.warn(e);
       }
     }
 
-    async function loadHoldings(){
-      const wrap  = document.getElementById('holdings');
-      const tbody = document.getElementById('holdings-rows');
-      try{
-        const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!r.ok){ wrap.style.display='none'; return; }
-        const state = await r.json();
-        const positions = state.positions || {};
-        const tickers = Object.keys(positions);
-        if(!tickers.length){ wrap.style.display='none'; return; }
-
-        const lastByTicker = new Map((window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)]));
-
-        tbody.innerHTML = tickers.map(t=>{
-          const p=positions[t], qty=+p.qty, entry=+p.entry_price, last=+(lastByTicker.get(t)??entry);
-          const stake=+(p.stake_nok ?? qty*entry);
-          const plNok = qty*last - stake;
-          const plPct = stake ? (plNok/stake) : 0;
-          return `<tr>
-            <td>${t}</td>
-            <td>${fmtQty(qty)}</td>
-            <td>${fmtPx(entry)}</td>
-            <td>${fmtPx(last)}</td>
-            <td>${plNok.toFixed(2)}</td>
-            <td>${(plPct*100).toFixed(2)}%</td>
-          </tr>`;
-        }).join('');
-        wrap.style.display='';
-      }catch(e){
-        wrap.style.display='none';
-      }
-    }
-
-    // Initial draw + periodic refresh
+    // Initial draw + periodic refresh for charts
     drawOsebx();
     drawPortfolio();
     setInterval(()=>{ drawOsebx(); drawPortfolio(); }, 60_000);
