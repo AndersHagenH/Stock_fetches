@@ -1,0 +1,9 @@
+{
+  "cash": 50000.0,
+  "positions": {},
+  "max_slots": 10,
+  "stake_nok": 5000.0,
+  "fee_buy": 29.0,
+  "fee_sell": 29.0,
+  "start_nav": 50000.0
+}
