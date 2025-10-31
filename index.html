@@ -142,7 +142,7 @@
   </footer>
 
   <script>
-    // Detect where we’re running:
+    // Base path for data files (works on GitHub Pages and locally)
     const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
     const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
 
@@ -150,14 +150,13 @@
     const JSON_URL = BASE + 'public/data/scan_3day.json';
     const CSV_URL  = BASE + 'public/data/scan_3day.csv';
 
-    // Portfolio sources
+    // Portfolio sources (used later)
     const PORT_NAV_URL   = BASE + 'public/data/portfolio_nav.json';
     const PORT_STATE_URL = BASE + 'public/data/portfolio_state.json';
 
     const metaEl = document.getElementById('meta');
     const tbody  = document.getElementById('rows');
 
-    // Robust parsing for strings like "2025-10-30 11:11 UTC"
     function parseUTC(s){
       if (typeof s !== 'string') return new Date(s);
       const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/);
@@ -198,7 +197,6 @@
       }).join('');
     }
 
-    // Minimal CSV parser (fallback)
     function parseCSV(text){
       const lines = text.trim().split(/\r?\n/);
       const headers = lines.shift().split(',').map(h => h.trim());
@@ -237,139 +235,141 @@
     setInterval(loadSignals, 60_000);
   </script>
 
-<!-- Chart.js for the OSEBX + (optional) Portfolio lines -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<script>
-  const OSEBX_URL      = BASE + 'public/data/osebx.json';
-  const PORT_NAV_URL   = BASE + 'public/data/portfolio_nav.json';
-  const PORT_STATE_URL = BASE + 'public/data/portfolio_state.json';
+  <!-- Chart.js for the OSEBX + (optional) Portfolio lines -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+  (()=>{
+    // Recompute BASE locally so this block is self-contained
+    const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
+    const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
+    const OSEBX_URL      = BASE + 'public/data/osebx.json';
+    const PORT_NAV_URL   = BASE + 'public/data/portfolio_nav.json';
+    const PORT_STATE_URL = BASE + 'public/data/portfolio_state.json';
 
-  const fmtPct = x => Number.isFinite(+x) ? ((+x) * 100).toFixed(2) + '%' : '—';
-  const fmtPx  = x => Number.isFinite(+x) ? (+x).toFixed(4) : '—';
-  const fmtQty = x => Number.isFinite(+x) ? (+x).toFixed(6) : '—';
+    const fmtPct = x => Number.isFinite(+x) ? ((+x) * 100).toFixed(2) + '%' : '—';
+    const fmtPx  = x => Number.isFinite(+x) ? (+x).toFixed(4) : '—';
+    const fmtQty = x => Number.isFinite(+x) ? (+x).toFixed(6) : '—';
 
-  async function loadOsebxAndPortfolio() {
-    const meta = document.getElementById('osebx-meta');
-    const ctx  = document.getElementById('osebx-chart').getContext('2d');
+    async function drawChart() {
+      const meta = document.getElementById('osebx-meta');
+      const ctx  = document.getElementById('osebx-chart').getContext('2d');
 
-    let chart; // will hold the OSEBX chart
+      let chart = null;
 
-    try {
-      // 1) Always load and render OSEBX first
-      const osexbRes = await fetch(`${OSEBX_URL}?t=${Date.now()}`, { cache: 'no-store' });
-      if (!osexbRes.ok) throw new Error(`OSEBX HTTP ${osexbRes.status}`);
-      const o = await osexbRes.json(); // { rows:[{t,close}], as_of, ticker }
+      // 1) Always render OSEBX first
+      try {
+        const res = await fetch(`${OSEBX_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`OSEBX ${res.status}`);
+        const o = await res.json();
 
-      const labels = (o.rows || []).map(p => p.t);
-      const closes = (o.rows || []).map(p => p.close);
+        const rows = Array.isArray(o.rows) ? o.rows : Array.isArray(o.data) ? o.data : [];
+        const labels = rows.map(p => p.t || p.date || p.time);
+        const closes = rows.map(p => p.close ?? p.Close ?? p.c);
 
-      meta.textContent = `As of ${o.as_of} (source: ${o.ticker})`;
+        if (!labels.length || !closes.length) throw new Error('OSEBX: empty data');
 
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            {
+        meta.textContent = `As of ${o.as_of || o.asOf || ''} (source: ${o.ticker || 'OSEBX.OL'})`;
+
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
               label: 'OSEBX',
               data: closes,
               tension: 0.25,
               borderWidth: 2,
-              borderColor: '#62b0ff', // blue
+              borderColor: '#62b0ff',
               pointRadius: 0
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } },
-            y: { grid: { color: 'rgba(255,255,255,0.12)' } }
+            }]
           },
-          plugins: {
-            legend: { display: true },
-            tooltip: { intersect: false, mode: 'index' }
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } },
+              y: { grid: { color: 'rgba(255,255,255,0.12)' } }
+            },
+            plugins: {
+              legend: { display: true },
+              tooltip: { intersect: false, mode: 'index' }
+            }
           }
-        }
-      });
-    } catch (e) {
-      meta.textContent = 'Failed to load data';
-      console.error(e);
-      return; // without OSEBX there’s nothing to show
-    }
-
-    // 2) Try to overlay Portfolio (non-blocking). If anything fails, just skip it.
-    try {
-      const portRes = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache: 'no-store' });
-      if (portRes.ok) {
-        const portfolio = await portRes.json(); // [{date, nav}]
-        if (Array.isArray(portfolio) && portfolio.length) {
-          // Align by date to the existing OSEBX x-axis
-          const navMap = new Map(portfolio.map(p => [p.date, p.nav]));
-          const navSeries = chart.data.labels.map(d => navMap.get(d) ?? null);
-
-          chart.data.datasets.push({
-            label: 'Portfolio',
-            data: navSeries,
-            tension: 0.25,
-            borderWidth: 2,
-            borderColor: '#33e2a0', // green
-            pointRadius: 0
-          });
-          chart.update();
-        }
+        });
+      } catch (err) {
+        console.error(err);
+        document.getElementById('osebx-meta').textContent = 'Failed to load data';
+        return;
       }
-    } catch (e) {
-      // Silently ignore portfolio errors; index line is already shown
-      console.warn('Portfolio overlay skipped:', e);
+
+      // 2) Overlay Portfolio if available (non-blocking)
+      try {
+        const r = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!r.ok) throw new Error(`Portfolio ${r.status}`);
+        const navArr = await r.json();
+        if (!Array.isArray(navArr) || navArr.length === 0) throw new Error('Portfolio: empty');
+
+        const navMap = new Map(navArr.map(p => [p.date, p.nav]));
+        const navSeries = chart.data.labels.map(d => navMap.get(d) ?? null);
+
+        chart.data.datasets.push({
+          label: 'Portfolio',
+          data: navSeries,
+          tension: 0.25,
+          borderWidth: 2,
+          borderColor: '#33e2a0',
+          pointRadius: 0
+        });
+        chart.update();
+      } catch (err) {
+        console.warn('Portfolio overlay skipped:', err.message || err);
+      }
+
+      // 3) Holdings table (independent; hidden if none)
+      loadHoldings();
     }
 
-    // 3) Build holdings table independently (doesn’t affect chart)
-    loadHoldings();
-  }
+    async function loadHoldings() {
+      const wrap  = document.getElementById('holdings');
+      const tbody = document.getElementById('holdings-rows');
+      try {
+        const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache: 'no-store' });
+        if (!r.ok) { wrap.style.display = 'none'; return; }
+        const state = await r.json();
+        const positions = state.positions || {};
+        const tickers = Object.keys(positions);
+        if (!tickers.length) { wrap.style.display = 'none'; return; }
 
-  async function loadHoldings() {
-    const wrap  = document.getElementById('holdings');
-    const tbody = document.getElementById('holdings-rows');
-    try {
-      const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache: 'no-store' });
-      if (!r.ok) { wrap.style.display = 'none'; return; }
-      const state = await r.json();
-      const positions = state.positions || {};
-      const tickers = Object.keys(positions);
-      if (!tickers.length) { wrap.style.display = 'none'; return; }
+        const lastByTicker = new Map((window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)]));
 
-      const lastByTicker = new Map((window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)]));
+        const rowsHtml = tickers.map(t => {
+          const p = positions[t];
+          const qty   = Number(p.qty);
+          const entry = Number(p.entry_price);
+          const last  = Number(lastByTicker.get(t) ?? entry);
+          const stake = Number(p.stake_nok ?? qty * entry);
+          const plNok = qty * last - stake;
+          const plPct = stake ? (plNok / stake) : 0;
+          return `<tr>
+            <td>${t}</td>
+            <td>${fmtQty(qty)}</td>
+            <td>${fmtPx(entry)}</td>
+            <td>${fmtPx(last)}</td>
+            <td>${plNok.toFixed(2)}</td>
+            <td>${(plPct*100).toFixed(2)}%</td>
+          </tr>`;
+        }).join('');
 
-      const rows = tickers.map(t => {
-        const p = positions[t];
-        const qty   = Number(p.qty);
-        const entry = Number(p.entry_price);
-        const last  = Number(lastByTicker.get(t) ?? entry);
-        const stake = Number(p.stake_nok ?? qty * entry);
-        const plNok = qty * last - stake;
-        const plPct = stake ? (plNok / stake) : 0;
-        return `<tr>
-          <td>${t}</td>
-          <td>${fmtQty(qty)}</td>
-          <td>${fmtPx(entry)}</td>
-          <td>${fmtPx(last)}</td>
-          <td>${plNok.toFixed(2)}</td>
-          <td>${fmtPct(plPct)}</td>
-        </tr>`;
-      });
-
-      tbody.innerHTML = rows.join('');
-      wrap.style.display = '';
-    } catch (e) {
-      wrap.style.display = 'none'; // hide if file missing or no positions yet
+        tbody.innerHTML = rowsHtml;
+        wrap.style.display = '';
+      } catch {
+        wrap.style.display = 'none';
+      }
     }
-  }
 
-  loadOsebxAndPortfolio();
-  setInterval(() => { loadOsebxAndPortfolio(); }, 60_000);
-</script>
-
+    drawChart();
+    setInterval(drawChart, 60_000);
+  })();
+  </script>
 </body>
 </html>
