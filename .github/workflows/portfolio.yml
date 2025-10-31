@@ -1,1 +1,36 @@
+name: Portfolio Builder
+
+on:
+  schedule:
+    # Runs every 30 minutes (same as your signals job)
+    - cron: "*/30 * * * *"
+  workflow_dispatch:  # allows you to trigger manually from GitHub UI
+
+jobs:
+  build_portfolio:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run portfolio builder
+        run: python portfolio_builder.py
+
+      - name: Commit and push results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/portfolio_state.json public/data/portfolio_nav.json public/data/trade_log.csv
+          git commit -m "Update portfolio JSONs" || echo "No changes to commit"
+          git push
 
