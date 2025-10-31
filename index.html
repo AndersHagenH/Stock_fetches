@@ -30,25 +30,22 @@
     nav a{color:var(--muted);text-decoration:none}
     nav a:hover{color:var(--text)}
 
-    /* ===== Responsive grid with fluid columns and gaps ===== */
+    /* ===== Reverted GRID to the earlier V2 layout ===== */
     main{
       flex:1;
       display:grid;
-      /* Left column scales between 320px and 560px, otherwise ~28% of viewport width */
-      grid-template-columns: clamp(320px, 28vw, 560px) 1fr;
+      grid-template-columns:minmax(320px,720px) 1fr;
       grid-template-areas:
         "left right"
         "left right2";
-      gap: clamp(20px, 4vw, 48px);
-      padding: 0 clamp(16px, 8vw, 96px) 10vh;
-      max-width: 1400px;
-      margin: 0 auto;
+      gap:48px;
+      padding:0 8vw 10vh;
     }
     section{ grid-area:left; }
     #osebx{ grid-area:right; }
     #portfolio{ grid-area:right2; }
 
-    /* Stack on smaller screens in the order: left → OSEBX → Portfolio */
+    /* Stack order on smaller screens: left → OSEBX → Portfolio */
     @media (max-width:1024px){
       main{
         grid-template-columns:1fr;
@@ -56,7 +53,6 @@
           "left"
           "right"
           "right2";
-        max-width: 980px;
       }
     }
     @media (max-width:640px){ main{ padding-bottom: 64px; } }
@@ -78,7 +74,7 @@
     .hold{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--text)}
     footer{padding:36px clamp(16px, 8vw, 96px) 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
 
-    /* Chart containers: fluid aspect ratio instead of fixed heights */
+    /* Chart containers: keep aspect ratio scaling (not part of grid) */
     .chart { width:100%; aspect-ratio: 16 / 6; }
     @media (max-width:1024px){ .chart { aspect-ratio: 16 / 9; } }
 
