@@ -2,7 +2,7 @@ name: Update 3-day scan
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # every 30 min (tune as you like)
+    - cron: "0 17 * * 1-5"   # 17:00 UTC → 18:00 CET / 19:00 CEST
   workflow_dispatch:
 
 jobs:
