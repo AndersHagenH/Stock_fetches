@@ -44,26 +44,21 @@
     #left{ grid-area:left; }
     #left2{ grid-area:left2; }
 
-    /* RIGHT wrapper (two charts stacked).
-       Added margin-top:40px so its top matches the Signals card top. */
+    /* RIGHT wrapper */
     #right-col{
       grid-area:right;
       display:flex;
       flex-direction:column;
       gap:48px;
       min-height:0;
-      margin-top:200px;           /* <-- align OSEBX top with Signals top */
+      margin-top:200px;
     }
-
-    /* Both right-hand cards split available height */
     #right-col .card{
       flex:1 1 0;
       display:flex;
       flex-direction:column;
       min-height:0;
     }
-
-    /* Stack order on smaller screens: Signals → charts → Holdings */
     @media (max-width:1024px){
       main{
         grid-template-columns:1fr;
@@ -92,17 +87,14 @@
     .hold{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--text)}
     footer{padding:36px clamp(16px, 8vw, 96px) 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,0.06)}
 
-    /* Chart canvas area fills its card */
     .chart{ flex:1 1 0; min-height:0; width:100%; }
 
-    /* Holdings tweaks */
     #holdings { margin-top: 12px; }
     #holdings table th, #holdings table td { font-size:.9rem; }
   </style>
 
-  <!-- ADDITIONS: Front page styles (non-destructive) -->
+  <!-- Front page styles -->
   <style>
-    /* Visibility control: show landing by default; show Fund 1 content when body has .show-fund1 */
     body:not(.show-fund1) header,
     body:not(.show-fund1) main,
     body:not(.show-fund1) footer { display: none; }
@@ -110,7 +102,6 @@
     #front-page { display: none; }
     body:not(.show-fund1) #front-page { display: flex; }
 
-    /* Front page layout */
     #front-page{
       min-height:100vh;
       width:100%;
@@ -128,7 +119,7 @@
       flex-direction:column;
       align-items:center;
       gap:28px;
-      transform: translateY(-6%); /* a little high up */
+      transform: translateY(-6%);
     }
     #front-title{
       font-weight:700;
@@ -175,7 +166,7 @@
 </head>
 <body>
 
-  <!-- ADDITIONS: Front page markup -->
+  <!-- Landing Page -->
   <section id="front-page" aria-label="Landing">
     <div id="front-inner">
       <div id="front-title">Squarepoint</div>
@@ -198,13 +189,11 @@
   </header>
 
   <main>
-    <!-- LEFT: SIGNALS ONLY -->
     <section id="left">
       <div class="eyebrow">A Garage Project</div>
       <h1>Stock Picks & Portfolio Tracker</h1>
       <p>Tina is back.</p>
 
-      <!-- SIGNALS -->
       <aside class="card" id="signals" style="margin-top:40px;">
         <h2 style="margin:0 0 8px">Today’s Signals</h2>
         <div id="meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
@@ -227,9 +216,7 @@
       </aside>
     </section>
 
-    <!-- RIGHT: charts wrapper (aligned to Signals top via margin-top:40px) -->
     <div id="right-col">
-      <!-- OSEBX CARD -->
       <aside class="card" id="osebx">
         <h2 style="margin:0 0 8px">OSEBX (1y)</h2>
         <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
@@ -239,7 +226,6 @@
         <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
       </aside>
 
-      <!-- PORTFOLIO NAV CARD -->
       <aside class="card" id="portfolio" style="align-self:stretch;">
         <h2 style="margin:0 0 8px">Portfolio NAV</h2>
         <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
@@ -249,7 +235,6 @@
       </aside>
     </div>
 
-    <!-- LEFT ROW 2: HOLDINGS -->
     <aside class="card" id="left2">
       <h2 style="margin:0 0 8px">
         Portfolio Holdings
@@ -282,11 +267,9 @@
   </footer>
 
   <script>
-    // Base path (works on GitHub Pages and locally)
     const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
     const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
 
-    // Data sources
     const JSON_URL = BASE + 'public/data/scan_3day.json';
     const CSV_URL  = BASE + 'public/data/scan_3day.csv';
     const OSEBX_URL      = BASE + 'public/data/osebx.json';
@@ -307,7 +290,6 @@
     const fmtQty  = x => Number.isFinite(+x) ? (+x).toFixed(6) : '—';
     const fmtNok  = x => Number.isFinite(+x) ? (+x).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
 
-    // expose scan rows globally so holdings can use latest prices
     window.latestScanRows = [];
 
     function renderRows(rows){
@@ -343,7 +325,7 @@
       return lines.map(line=>{
         const parts = line.split(',').map(v => v.trim());
         const row = {};
-        headers.forEach((h,i)=>row[h] = parts[i] ?? '';
+        headers.forEach((h,i)=>row[h] = parts[i] ?? '');
         if ('3D_Return' in row) row['3D_Return'] = Number(row['3D_Return']);
         if ('LastPrice' in row) row['LastPrice'] = Number(row['LastPrice']);
         return row;
@@ -387,7 +369,6 @@
       }
     }
 
-    // Build holdings (left2 card). Show a "No open positions" row if empty.
     async function loadHoldings(){
       const wrap  = document.getElementById('holdings');
       const tbody = document.getElementById('holdings-rows');
@@ -425,12 +406,10 @@
       }
     }
 
-    // Initial load + periodic refresh
     loadSignals();
     setInterval(loadSignals, 60_000);
   </script>
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
     async function drawOsebx(){
@@ -475,7 +454,7 @@
       try{
         const res = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
         if(!res.ok) throw new Error(`Portfolio ${res.status}`);
-        const arr = await res.json(); // [{date, nav}]
+        const arr = await res.json();
         if(!Array.isArray(arr) || !arr.length) throw new Error('No portfolio data yet');
 
         const labels = arr.map(p => p.date);
@@ -505,38 +484,46 @@
       }
     }
 
-    // Draw charts and refresh every minute
     drawOsebx();
     drawPortfolio();
     setInterval(()=>{ drawOsebx(); drawPortfolio(); }, 60_000);
   </script>
 
-  <!-- ADDITIONS: Tiny script to handle landing → Fund 1 toggle -->
+  <!-- FIXED SCRIPT: re-run data + charts after Fund 1 becomes visible -->
   <script>
     (function(){
       const body = document.body;
 
       function showFund1(){
         body.classList.add('show-fund1');
-        // Clean up the hash after navigating to Fund 1 for a nicer URL
+
+        // Re-fetch data + redraw charts now that elements are visible
+        try { loadSignals(); } catch(e){}
+        try { drawOsebx(); } catch(e){}
+        try { drawPortfolio(); } catch(e){}
+
+        // Clean URL
         if (location.hash === '#fund1') {
           history.replaceState(null, document.title, location.pathname + location.search);
         }
       }
 
-      // If URL already has #fund1, open the fund view immediately
       if (location.hash === '#fund1') {
         showFund1();
       }
 
-      // Click handler for the "Fund 1" link on the front page
       document.addEventListener('click', (e) => {
         const link = e.target.closest('[data-fund1]');
         if (!link) return;
         e.preventDefault();
         showFund1();
       });
+
+      window.addEventListener('hashchange', () => {
+        if (location.hash === '#fund1') showFund1();
+      });
     })();
   </script>
+
 </body>
 </html>
