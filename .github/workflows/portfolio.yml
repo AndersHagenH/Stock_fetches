@@ -1,18 +1,20 @@
 name: Portfolio Builder
+permissions:
+  contents: write        # allow pushing generated JSON/CSV
 
 on:
   schedule:
-    # Runs every 30 minutes (same as your signals job)
-    - cron: "*/30 * * * *"
-  workflow_dispatch:  # allows you to trigger manually from GitHub UI
+    - cron: "*/30 * * * *"   # every 30 minutes
+  workflow_dispatch:         # manual Run workflow button
 
 jobs:
   build_portfolio:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,14 +25,17 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      # Ensure scan_3day.json exists/fresh for this run
+      - name: Run signal scan
+        run: python stockfetches.py
+
       - name: Run portfolio builder
         run: python portfolio_builder.py
 
-      - name: Commit and push results
+      - name: Commit and push data files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add public/data/portfolio_state.json public/data/portfolio_nav.json public/data/trade_log.csv
-          git commit -m "Update portfolio JSONs" || echo "No changes to commit"
+          git commit -m "Update portfolio files" || echo "No changes to commit"
           git push
-
