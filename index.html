@@ -30,29 +30,46 @@
     nav a{color:var(--muted);text-decoration:none}
     nav a:hover{color:var(--text)}
 
-    /* ===== Reverted GRID to the earlier V2 layout ===== */
+    /* ===== GRID that makes the right side match the Signals card height =====
+       Row 1:  left (Signals) | right (charts wrapper)  -> equal row height
+       Row 2:  left2 (Holdings) | empty                 -> no stretch on right
+    */
     main{
       flex:1;
       display:grid;
       grid-template-columns:minmax(320px,720px) 1fr;
       grid-template-areas:
-        "left right"
-        "left right2";
+        "left  right"
+        "left2 .";
       gap:48px;
       padding:0 8vw 10vh;
     }
-    section{ grid-area:left; }
-    #osebx{ grid-area:right; }
-    #portfolio{ grid-area:right2; }
+    #left{ grid-area:left; }
+    #left2{ grid-area:left2; }
+    #right-col{
+      grid-area:right;
+      display:flex;
+      flex-direction:column;
+      gap:48px;                   /* space between OSEBX and Portfolio */
+      min-height:0;               /* allow flex children to shrink properly */
+    }
 
-    /* Stack order on smaller screens: left → OSEBX → Portfolio */
+    /* Make both right-hand cards share the available height 50/50 */
+    #right-col .card{
+      flex:1 1 0;
+      display:flex;
+      flex-direction:column;      /* let chart area grow inside card */
+      min-height:0;
+    }
+
+    /* Stack order on smaller screens: Signals → charts → Holdings */
     @media (max-width:1024px){
       main{
         grid-template-columns:1fr;
         grid-template-areas:
           "left"
           "right"
-          "right2";
+          "left2";
       }
     }
     @media (max-width:640px){ main{ padding-bottom: 64px; } }
@@ -74,9 +91,8 @@
     .hold{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--text)}
     footer{padding:36px clamp(16px, 8vw, 96px) 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
 
-    /* Chart containers: keep aspect ratio scaling (not part of grid) */
-    .chart { width:100%; aspect-ratio: 16 / 6; }
-    @media (max-width:1024px){ .chart { aspect-ratio: 16 / 9; } }
+    /* Chart area grows to fill its card */
+    .chart{ flex:1 1 0; min-height:0; width:100%; }
 
     /* Holdings tweaks */
     #holdings { margin-top: 12px; }
@@ -94,8 +110,8 @@
   </header>
 
   <main>
-    <!-- LEFT COLUMN -->
-    <section>
+    <!-- LEFT: SIGNALS ONLY -->
+    <section id="left">
       <div class="eyebrow">A Garage Project</div>
       <h1>Daily stock picks</h1>
       <p>Strategy provided by Mr. Bert.</p>
@@ -121,50 +137,54 @@
           </table>
         </div>
       </aside>
-
-      <!-- HOLDINGS (left, under signals) -->
-      <aside class="card" id="holdings-card" style="margin-top:20px;">
-        <h2 style="margin:0 0 8px">
-          Portfolio Holdings
-          <span id="nav-pill" class="badge hold" style="margin-left:8px">
-            NAV: <span id="nav-number">—</span> NOK
-          </span>
-        </h2>
-        <div id="holdings" class="table-wrap">
-          <table aria-label="Current holdings">
-            <thead>
-              <tr>
-                <th>Ticker</th>
-                <th>Qty</th>
-                <th>Entry</th>
-                <th>Last</th>
-                <th>P&amp;L (NOK)</th>
-                <th>P&amp;L (%)</th>
-              </tr>
-            </thead>
-            <tbody id="holdings-rows">
-              <tr><td colspan="6">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </aside>
     </section>
 
-    <!-- RIGHT COLUMN -->
-    <aside class="card" id="osebx">
-      <h2 style="margin:0 0 8px">OSEBX (1y)</h2>
-      <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-      <div class="chart" style="margin-top:8px">
-        <canvas id="osebx-chart"></canvas>
-      </div>
-      <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
-    </aside>
+    <!-- RIGHT: WRAPPER THAT HOLDS BOTH CHART CARDS (fills height of Signals) -->
+    <div id="right-col">
+      <!-- OSEBX CARD -->
+      <aside class="card" id="osebx">
+        <h2 style="margin:0 0 8px">OSEBX (1y)</h2>
+        <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
+        <div class="chart" style="margin-top:8px">
+          <canvas id="osebx-chart"></canvas>
+        </div>
+        <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
+      </aside>
 
-    <aside class="card" id="portfolio" style="align-self:start;">
-      <h2 style="margin:0 0 8px">Portfolio NAV</h2>
-      <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-      <div class="chart" style="margin-top:8px">
-        <canvas id="portfolio-chart"></canvas>
+      <!-- PORTFOLIO NAV CARD -->
+      <aside class="card" id="portfolio" style="align-self:stretch;">
+        <h2 style="margin:0 0 8px">Portfolio NAV</h2>
+        <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
+        <div class="chart" style="margin-top:8px">
+          <canvas id="portfolio-chart"></canvas>
+        </div>
+      </aside>
+    </div>
+
+    <!-- LEFT ROW 2: HOLDINGS (separate area so row 1 height = Signals only) -->
+    <aside class="card" id="left2">
+      <h2 style="margin:0 0 8px">
+        Portfolio Holdings
+        <span id="nav-pill" class="badge hold" style="margin-left:8px">
+          NAV: <span id="nav-number">—</span> NOK
+        </span>
+      </h2>
+      <div id="holdings" class="table-wrap">
+        <table aria-label="Current holdings">
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Qty</th>
+              <th>Entry</th>
+              <th>Last</th>
+              <th>P&amp;L (NOK)</th>
+              <th>P&amp;L (%)</th>
+            </tr>
+          </thead>
+          <tbody id="holdings-rows">
+            <tr><td colspan="6">Loading…</td></tr>
+          </tbody>
+        </table>
       </div>
     </aside>
   </main>
@@ -279,7 +299,7 @@
       }
     }
 
-    // Build holdings (left card). Show a "No open positions" row if empty.
+    // Build holdings (left2 card). Show a "No open positions" row if empty.
     async function loadHoldings(){
       const wrap  = document.getElementById('holdings');
       const tbody = document.getElementById('holdings-rows');
