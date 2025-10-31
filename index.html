@@ -30,6 +30,7 @@
     nav a{color:var(--muted);text-decoration:none}
     nav a:hover{color:var(--text)}
 
+    /* Two-column layout aligned with the header padding */
     main{
       flex:1;
       display:grid;
@@ -55,18 +56,14 @@
     .hold{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--text)}
     footer{padding:36px 8vw 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
 
+    /* Responsive: stack columns on smaller screens */
     @media (max-width:1024px){ main{grid-template-columns:1fr} }
     @media (max-width:640px){ main{gap:28px;padding-bottom:64px} }
 
-    /* Legend & holdings styles */
-    .inline-legend{display:flex;gap:14px;align-items:center;margin-top:6px}
-    .chip{display:inline-flex;align-items:center;gap:8px;font-size:.9rem;color:var(--muted)}
-    .dot{width:10px;height:10px;border-radius:50%}
-    .dot-blue{background:var(--blue)}
-    .dot-green{background:var(--accent)}
-    #holdings { margin-top:16px; }
-    #holdings h3{ margin:6px 0 8px; font-size:1rem; }
-    #holdings table th, #holdings table td { font-size:.9rem; }
+    /* ---- additions for holdings table only ---- */
+    #holdings { margin-top: 12px; }
+    #holdings h3 { margin: 6px 0 8px; font-size: 1rem; }
+    #holdings table th, #holdings table td { font-size: .9rem; }
   </style>
 </head>
 <body>
@@ -116,11 +113,7 @@
         <canvas id="osebx-chart"></canvas>
       </div>
 
-      <div class="inline-legend">
-        <span class="chip"><span class="dot dot-blue"></span> OSEBX</span>
-        <span class="chip"><span class="dot dot-green"></span> Portfolio</span>
-      </div>
-
+      <!-- Holdings (hidden if no positions) -->
       <div id="holdings" class="table-wrap" style="display:none">
         <h3>Current Holdings</h3>
         <table aria-label="Current holdings">
@@ -148,93 +141,199 @@
     © 2025 Squarepoint · Data auto-updated by GitHub Actions
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
+    // Detect where we’re running:
     const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
     const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
 
+    // Signals sources
     const JSON_URL = BASE + 'public/data/scan_3day.json';
     const CSV_URL  = BASE + 'public/data/scan_3day.csv';
-    const OSEBX_URL = BASE + 'public/data/osebx.json';
+
+    // Portfolio sources
     const PORT_NAV_URL   = BASE + 'public/data/portfolio_nav.json';
     const PORT_STATE_URL = BASE + 'public/data/portfolio_state.json';
 
     const metaEl = document.getElementById('meta');
     const tbody  = document.getElementById('rows');
-    const fmtDate = s => new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(new Date(s));
-    const fmtPct = x => Number.isFinite(+x)?((+x)*100).toFixed(2)+'%':'—';
-    const fmtPx  = x => Number.isFinite(+x)?(+x).toFixed(4):'—';
-    const fmtQty = x => Number.isFinite(+x)?(+x).toFixed(6):'—';
 
-    let latestScanRows=[];
+    // Robust parsing for strings like "2025-10-30 11:11 UTC"
+    function parseUTC(s){
+      if (typeof s !== 'string') return new Date(s);
+      const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/);
+      return m ? new Date(`${m[1]}T${m[2]}:${m[3]}:00Z`) : new Date(s);
+    }
+    const fmtDate = s => new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(parseUTC(s));
+    const fmtPct  = x => Number.isFinite(+x) ? ((+x) * 100).toFixed(2) + '%' : '—';
+    const fmtPx   = x => Number.isFinite(+x) ? (+x).toFixed(4) : '—';
+    const fmtQty  = x => Number.isFinite(+x) ? (+x).toFixed(6) : '—';
+
+    // expose scan rows globally so holdings code can use last prices
+    window.latestScanRows = [];
 
     function renderRows(rows){
-      latestScanRows=Array.isArray(rows)?rows:[];
-      if(!rows||!rows.length){tbody.innerHTML=`<tr><td colspan="5">No data</td></tr>`;return;}
-      metaEl.textContent=rows[0].Date?`As of ${fmtDate(rows[0].Date)}`:'';
-      tbody.innerHTML=rows.map(r=>{
-        const s=(r.Signal||'').toUpperCase();
-        return `<tr>
-          <td>${r.Ticker}</td>
-          <td>${fmtPx(r.LastPrice)}</td>
-          <td>${fmtPct(r["3D_Return"])}</td>
-          <td><span class="badge ${s==='BUY'?'buy':'hold'}">${s}</span></td>
-          <td>${fmtDate(r.Date)}</td>
-        </tr>`;
+      window.latestScanRows = Array.isArray(rows) ? rows : [];
+      if (!Array.isArray(rows) || rows.length === 0) {
+        metaEl.textContent = '';
+        tbody.innerHTML = `<tr><td colspan="5">No data</td></tr>`;
+        return;
+      }
+      rows.sort((a,b) => (a["3D_Return"] ?? 9e9) - (b["3D_Return"] ?? 9e9));
+      metaEl.textContent = rows[0].Date ? `As of ${fmtDate(rows[0].Date)}` : '';
+
+      tbody.innerHTML = rows.map(r => {
+        const lastPrice = fmtPx(r.LastPrice);
+        const ret3d     = fmtPct(r["3D_Return"]);
+        const signalRaw = (r.Signal || '').toUpperCase();
+        const signalCls = signalRaw === 'BUY' ? 'buy' : 'hold';
+        const asOf      = r.Date ? fmtDate(r.Date) : '—';
+        return `
+          <tr>
+            <td>${r.Ticker}</td>
+            <td>${lastPrice}</td>
+            <td>${ret3d}</td>
+            <td><span class="badge ${signalCls}">${signalRaw}</span></td>
+            <td>${asOf}</td>
+          </tr>`;
       }).join('');
+    }
+
+    // Minimal CSV parser (fallback)
+    function parseCSV(text){
+      const lines = text.trim().split(/\r?\n/);
+      const headers = lines.shift().split(',').map(h => h.trim());
+      return lines.map(line => {
+        const parts = line.split(',').map(v => v.trim());
+        const row = {};
+        headers.forEach((h,i) => row[h] = parts[i] ?? '');
+        if ('3D_Return' in row) row['3D_Return'] = Number(row['3D_Return']);
+        if ('LastPrice' in row) row['LastPrice'] = Number(row['LastPrice']);
+        return row;
+      });
     }
 
     async function loadSignals(){
       try{
-        const r=await fetch(`${JSON_URL}?t=${Date.now()}`,{cache:'no-store'});
+        const r = await fetch(`${JSON_URL}?t=${Date.now()}`, { cache:'no-store' });
+        if (!r.ok) throw new Error(`JSON HTTP ${r.status}`);
         renderRows(await r.json());
-      }catch(e){console.error(e);}
+        return;
+      }catch(e){
+        console.warn('JSON failed, falling back to CSV:', e);
+      }
+      try{
+        const r = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache:'no-store' });
+        if (!r.ok) throw new Error(`CSV HTTP ${r.status}`);
+        const text = await r.text();
+        renderRows(parseCSV(text));
+      }catch(e){
+        console.error(e);
+        metaEl.textContent = 'Failed to load';
+        tbody.innerHTML = `<tr><td colspan="5" style="color:#f88">Fetch error: ${String(e)}</td></tr>`;
+      }
     }
 
+    loadSignals();
+    setInterval(loadSignals, 60_000);
+  </script>
+
+  <!-- Chart.js for the OSEBX + Portfolio lines -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    // OSEBX JSON produced by your workflow
+    const OSEBX_URL = BASE + 'public/data/osebx.json';
+
     async function loadOsebxAndPortfolio(){
-      const meta=document.getElementById('osebx-meta');
-      const ctx=document.getElementById('osebx-chart').getContext('2d');
+      const meta = document.getElementById('osebx-meta');
+      const ctx  = document.getElementById('osebx-chart').getContext('2d');
+
       try{
-        const [osebxRes,portRes]=await Promise.all([
-          fetch(OSEBX_URL+'?t='+Date.now()),fetch(PORT_NAV_URL+'?t='+Date.now())
+        const [osebxRes, portRes] = await Promise.all([
+          fetch(`${OSEBX_URL}?t=${Date.now()}`, { cache:'no-store' }),
+          fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' })
         ]);
-        const o=await osexbRes.json(); // OSEBX data
-        const p=portRes.ok?await portRes.json():[];
-        const labels=o.rows.map(x=>x.t),closes=o.rows.map(x=>x.close);
-        const navMap=new Map(p.map(x=>[x.date,x.nav]));
-        const navSeries=labels.map(d=>navMap.get(d)||null);
-        meta.textContent=`As of ${o.as_of} (source: ${o.ticker})`;
-        new Chart(ctx,{type:'line',data:{labels,
-          datasets:[
-            {label:'OSEBX',data:closes,borderColor:getComputedStyle(document.documentElement).getPropertyValue('--blue').trim(),borderWidth:2,pointRadius:0,tension:.25},
-            {label:'Portfolio',data:navSeries,borderColor:getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),borderWidth:2,pointRadius:0,tension:.25}
-          ]},
-          options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{maxTicksLimit:6},grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.12)'}}},plugins:{legend:{display:true,labels:{color:getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()}},tooltip:{intersect:false,mode:'index'}}}
+        if (!osebxRes.ok) throw new Error(`OSEBX HTTP ${osebxRes.status}`);
+
+        const o = await osexbRes.json();         // { rows:[{t,close}], as_of, ticker }
+        const portfolio = portRes.ok ? await portRes.json() : [];
+
+        const labels = o.rows.map(p => p.t);
+        const closes = o.rows.map(p => p.close);
+
+        // Align portfolio nav by date (nulls keep line gaps where missing)
+        const navMap = new Map((portfolio || []).map(p => [p.date, p.nav]));
+        const navSeries = labels.map(d => navMap.has(d) ? navMap.get(d) : null);
+
+        meta.textContent = `As of ${o.as_of} (source: ${o.ticker})`;
+
+        const osebxBlue = '#62b0ff';
+        const portGreen = '#33e2a0';
+
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              { label:'OSEBX',     data:closes,    tension:0.25, borderWidth:2, borderColor:osebxBlue, pointRadius:0 },
+              { label:'Portfolio', data:navSeries, tension:0.25, borderWidth:2, borderColor:portGreen, pointRadius:0 }
+            ]
+          },
+          options: {
+            responsive:true, maintainAspectRatio:false,
+            scales:{ x:{ticks:{maxTicksLimit:6}, grid:{display:false}}, y:{grid:{color:'rgba(255,255,255,0.12)'}} },
+            plugins:{ legend:{ display:true }, tooltip:{ intersect:false, mode:'index' } }
+          }
         });
-      }catch(e){meta.textContent='Failed to load data';console.error(e);}
+
+        // Build holdings table after chart loads
+        loadHoldings();
+
+      }catch(e){
+        meta.textContent = 'Failed to load data';
+        console.error(e);
+      }
     }
 
     async function loadHoldings(){
-      const wrap=document.getElementById('holdings');
-      const tbody=document.getElementById('holdings-rows');
+      const wrap  = document.getElementById('holdings');
+      const tbody = document.getElementById('holdings-rows');
       try{
-        const r=await fetch(PORT_STATE_URL+'?t='+Date.now());
-        const s=await r.json();
-        const pos=s.positions||{};
-        const last=new Map(latestScanRows.map(r=>[r.Ticker,r.LastPrice]));
-        const tickers=Object.keys(pos);
-        if(!tickers.length){wrap.style.display='none';return;}
-        tbody.innerHTML=tickers.map(t=>{
-          const p=pos[t],qty=+p.qty,entry=+p.entry_price,lastPx=+(last.get(t)||entry);
-          const stake=+(p.stake_nok||qty*entry),plNok=qty*lastPx-stake,plPct=stake?(plNok/stake):0;
-          return `<tr><td>${t}</td><td>${fmtQty(qty)}</td><td>${fmtPx(entry)}</td><td>${fmtPx(lastPx)}</td><td>${plNok.toFixed(2)}</td><td>${fmtPct(plPct)}</td></tr>`;
-        }).join('');
-        wrap.style.display='';
-      }catch(e){wrap.style.display='none';}
+        const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache:'no-store' });
+        if (!r.ok) { wrap.style.display='none'; return; }
+        const state = await r.json();
+        const positions = state.positions || {};
+        const tickers = Object.keys(positions);
+        if (!tickers.length) { wrap.style.display='none'; return; }
+
+        const lastByTicker = new Map((window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)]));
+
+        const rows = tickers.map(t => {
+          const p = positions[t];
+          const qty   = Number(p.qty);
+          const entry = Number(p.entry_price);
+          const last  = Number(lastByTicker.get(t) ?? entry);
+          const stake = Number(p.stake_nok ?? qty * entry);
+          const plNok = qty * last - stake;
+          const plPct = stake ? (plNok / stake) : 0;
+          return `<tr>
+            <td>${t}</td>
+            <td>${fmtQty(qty)}</td>
+            <td>${fmtPx(entry)}</td>
+            <td>${fmtPx(last)}</td>
+            <td>${plNok.toFixed(2)}</td>
+            <td>${fmtPct(plPct)}</td>
+          </tr>`;
+        });
+
+        tbody.innerHTML = rows.join('');
+        wrap.style.display = '';
+      }catch(e){
+        wrap.style.display='none';
+      }
     }
 
-    loadSignals().then(()=>{loadOsebxAndPortfolio();loadHoldings();});
-    setInterval(()=>{loadSignals();loadOsebxAndPortfolio();loadHoldings();},60000);
+    loadOsebxAndPortfolio();
+    setInterval(() => { loadOsebxAndPortfolio(); loadHoldings(); }, 60_000);
   </script>
 </body>
 </html>
