@@ -106,11 +106,22 @@
     </section>
 
     <!-- RIGHT COLUMN -->
+    <!-- OSEBX CARD (unchanged layout) -->
     <aside class="card" id="osebx">
       <h2 style="margin:0 0 8px">OSEBX (1y)</h2>
       <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
       <div style="height:320px;margin-top:8px">
         <canvas id="osebx-chart"></canvas>
+      </div>
+      <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
+    </aside>
+
+    <!-- PORTFOLIO CARD (separate chart + holdings) -->
+    <aside class="card" id="portfolio" style="align-self:start;">
+      <h2 style="margin:0 0 8px">Portfolio NAV</h2>
+      <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
+      <div style="height:320px;margin-top:8px">
+        <canvas id="portfolio-chart"></canvas>
       </div>
 
       <!-- Holdings (hidden if no positions) -->
@@ -132,8 +143,6 @@
           </tbody>
         </table>
       </div>
-
-      <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
     </aside>
   </main>
 
@@ -150,7 +159,8 @@
     const JSON_URL = BASE + 'public/data/scan_3day.json';
     const CSV_URL  = BASE + 'public/data/scan_3day.csv';
 
-    // Portfolio sources (used later)
+    // Portfolio sources
+    const OSEBX_URL      = BASE + 'public/data/osebx.json';
     const PORT_NAV_URL   = BASE + 'public/data/portfolio_nav.json';
     const PORT_STATE_URL = BASE + 'public/data/portfolio_state.json';
 
@@ -235,121 +245,106 @@
     setInterval(loadSignals, 60_000);
   </script>
 
-  <!-- Chart.js for the OSEBX + (optional) Portfolio lines -->
+  <!-- Chart.js once for both charts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
-  (()=>{
-    // Recompute BASE locally so this block is self-contained
-    const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
-    const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
-    const OSEBX_URL      = BASE + 'public/data/osebx.json';
-    const PORT_NAV_URL   = BASE + 'public/data/portfolio_nav.json';
-    const PORT_STATE_URL = BASE + 'public/data/portfolio_state.json';
-
-    const fmtPct = x => Number.isFinite(+x) ? ((+x) * 100).toFixed(2) + '%' : '—';
-    const fmtPx  = x => Number.isFinite(+x) ? (+x).toFixed(4) : '—';
-    const fmtQty = x => Number.isFinite(+x) ? (+x).toFixed(6) : '—';
-
-    async function drawChart() {
+    // Draw OSEBX in its own chart/card
+    async function drawOsebx(){
       const meta = document.getElementById('osebx-meta');
       const ctx  = document.getElementById('osebx-chart').getContext('2d');
-
-      let chart = null;
-
-      // 1) Always render OSEBX first
-      try {
-        const res = await fetch(`${OSEBX_URL}?t=${Date.now()}`, { cache: 'no-store' });
-        if (!res.ok) throw new Error(`OSEBX ${res.status}`);
+      try{
+        const res = await fetch(`${OSEBX_URL}?t=${Date.now()}`, { cache:'no-store' });
+        if(!res.ok) throw new Error(`OSEBX ${res.status}`);
         const o = await res.json();
-
-        const rows = Array.isArray(o.rows) ? o.rows : Array.isArray(o.data) ? o.data : [];
+        const rows = Array.isArray(o.rows) ? o.rows : (Array.isArray(o.data) ? o.data : []);
         const labels = rows.map(p => p.t || p.date || p.time);
         const closes = rows.map(p => p.close ?? p.Close ?? p.c);
-
-        if (!labels.length || !closes.length) throw new Error('OSEBX: empty data');
+        if(!labels.length) throw new Error('No OSEBX data');
 
         meta.textContent = `As of ${o.as_of || o.asOf || ''} (source: ${o.ticker || 'OSEBX.OL'})`;
 
-        chart = new Chart(ctx, {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              label: 'OSEBX',
-              data: closes,
-              tension: 0.25,
-              borderWidth: 2,
-              borderColor: '#62b0ff',
-              pointRadius: 0
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: { ticks: { maxTicksLimit: 6 }, grid: { display: false } },
-              y: { grid: { color: 'rgba(255,255,255,0.12)' } }
-            },
-            plugins: {
-              legend: { display: true },
-              tooltip: { intersect: false, mode: 'index' }
-            }
+        new Chart(ctx,{
+          type:'line',
+          data:{ labels, datasets:[{
+            label:'OSEBX',
+            data:closes,
+            borderColor:'#62b0ff',
+            borderWidth:2,
+            pointRadius:0,
+            tension:.25
+          }]},
+          options:{
+            responsive:true, maintainAspectRatio:false,
+            scales:{ x:{ticks:{maxTicksLimit:6}, grid:{display:false}}, y:{grid:{color:'rgba(255,255,255,0.12)'}} },
+            plugins:{ legend:{display:true}, tooltip:{intersect:false,mode:'index'} }
           }
         });
-      } catch (err) {
-        console.error(err);
-        document.getElementById('osebx-meta').textContent = 'Failed to load data';
-        return;
+      }catch(e){
+        meta.textContent = 'Failed to load data';
+        console.error(e);
       }
-
-      // 2) Overlay Portfolio if available (non-blocking)
-      try {
-        const r = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache: 'no-store' });
-        if (!r.ok) throw new Error(`Portfolio ${r.status}`);
-        const navArr = await r.json();
-        if (!Array.isArray(navArr) || navArr.length === 0) throw new Error('Portfolio: empty');
-
-        const navMap = new Map(navArr.map(p => [p.date, p.nav]));
-        const navSeries = chart.data.labels.map(d => navMap.get(d) ?? null);
-
-        chart.data.datasets.push({
-          label: 'Portfolio',
-          data: navSeries,
-          tension: 0.25,
-          borderWidth: 2,
-          borderColor: '#33e2a0',
-          pointRadius: 0
-        });
-        chart.update();
-      } catch (err) {
-        console.warn('Portfolio overlay skipped:', err.message || err);
-      }
-
-      // 3) Holdings table (independent; hidden if none)
-      loadHoldings();
     }
 
-    async function loadHoldings() {
+    // Draw Portfolio NAV in its own chart/card and show holdings table
+    async function drawPortfolio(){
+      const meta = document.getElementById('portfolio-meta');
+      const ctx  = document.getElementById('portfolio-chart').getContext('2d');
+      try{
+        const res = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
+        if(!res.ok) throw new Error(`Portfolio ${res.status}`);
+        const arr = await res.json(); // [{date, nav}]
+        if(!Array.isArray(arr) || !arr.length) throw new Error('No portfolio data yet');
+
+        const labels = arr.map(p => p.date);
+        const navs   = arr.map(p => p.nav);
+
+        meta.textContent = `NAV points: ${arr.length}`;
+
+        new Chart(ctx,{
+          type:'line',
+          data:{ labels, datasets:[{
+            label:'Portfolio',
+            data:navs,
+            borderColor:'#33e2a0',
+            borderWidth:2,
+            pointRadius:0,
+            tension:.25
+          }]},
+          options:{
+            responsive:true, maintainAspectRatio:false,
+            scales:{ x:{ticks:{maxTicksLimit:6}, grid:{display:false}}, y:{grid:{color:'rgba(255,255,255,0.12)'}} },
+            plugins:{ legend:{display:true}, tooltip:{intersect:false,mode:'index'} }
+          }
+        });
+
+        // Build holdings table after the chart draws
+        loadHoldings();
+      }catch(e){
+        meta.textContent = 'No portfolio data';
+        // Hide holdings if no state yet
+        document.getElementById('holdings').style.display = 'none';
+        console.warn(e);
+      }
+    }
+
+    async function loadHoldings(){
       const wrap  = document.getElementById('holdings');
       const tbody = document.getElementById('holdings-rows');
-      try {
-        const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache: 'no-store' });
-        if (!r.ok) { wrap.style.display = 'none'; return; }
+      try{
+        const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache:'no-store' });
+        if(!r.ok){ wrap.style.display='none'; return; }
         const state = await r.json();
         const positions = state.positions || {};
         const tickers = Object.keys(positions);
-        if (!tickers.length) { wrap.style.display = 'none'; return; }
+        if(!tickers.length){ wrap.style.display='none'; return; }
 
         const lastByTicker = new Map((window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)]));
 
-        const rowsHtml = tickers.map(t => {
-          const p = positions[t];
-          const qty   = Number(p.qty);
-          const entry = Number(p.entry_price);
-          const last  = Number(lastByTicker.get(t) ?? entry);
-          const stake = Number(p.stake_nok ?? qty * entry);
-          const plNok = qty * last - stake;
-          const plPct = stake ? (plNok / stake) : 0;
+        tbody.innerHTML = tickers.map(t=>{
+          const p=positions[t], qty=+p.qty, entry=+p.entry_price, last=+(lastByTicker.get(t)??entry);
+          const stake=+(p.stake_nok ?? qty*entry);
+          const plNok = qty*last - stake;
+          const plPct = stake ? (plNok/stake) : 0;
           return `<tr>
             <td>${t}</td>
             <td>${fmtQty(qty)}</td>
@@ -359,17 +354,16 @@
             <td>${(plPct*100).toFixed(2)}%</td>
           </tr>`;
         }).join('');
-
-        tbody.innerHTML = rowsHtml;
-        wrap.style.display = '';
-      } catch {
-        wrap.style.display = 'none';
+        wrap.style.display='';
+      }catch(e){
+        wrap.style.display='none';
       }
     }
 
-    drawChart();
-    setInterval(drawChart, 60_000);
-  })();
+    // Initial draw + periodic refresh
+    drawOsebx();
+    drawPortfolio();
+    setInterval(()=>{ drawOsebx(); drawPortfolio(); }, 60_000);
   </script>
 </body>
 </html>
