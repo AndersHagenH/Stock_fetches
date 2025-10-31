@@ -30,10 +30,7 @@
     nav a{color:var(--muted);text-decoration:none}
     nav a:hover{color:var(--text)}
 
-    /* ===== GRID that makes the right side match the Signals card height =====
-       Row 1:  left (Signals) | right (charts wrapper)  -> equal row height
-       Row 2:  left2 (Holdings) | empty                 -> no stretch on right
-    */
+    /* GRID: row 1 is Signals + Right charts; row 2 is Holdings */
     main{
       flex:1;
       display:grid;
@@ -46,19 +43,23 @@
     }
     #left{ grid-area:left; }
     #left2{ grid-area:left2; }
+
+    /* RIGHT wrapper (two charts stacked).
+       Added margin-top:40px so its top matches the Signals card top. */
     #right-col{
       grid-area:right;
       display:flex;
       flex-direction:column;
-      gap:48px;                   /* space between OSEBX and Portfolio */
-      min-height:0;               /* allow flex children to shrink properly */
+      gap:48px;
+      min-height:0;
+      margin-top:40px;           /* <-- align OSEBX top with Signals top */
     }
 
-    /* Make both right-hand cards share the available height 50/50 */
+    /* Both right-hand cards split available height */
     #right-col .card{
       flex:1 1 0;
       display:flex;
-      flex-direction:column;      /* let chart area grow inside card */
+      flex-direction:column;
       min-height:0;
     }
 
@@ -89,9 +90,9 @@
     .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:600;font-size:.82rem}
     .buy{background:rgba(51,226,160,.24);border:1px solid rgba(51,226,160,.6);color:var(--text)}
     .hold{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--text)}
-    footer{padding:36px clamp(16px, 8vw, 96px) 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
+    footer{padding:36px clamp(16px, 8vw, 96px) 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,0.06)}
 
-    /* Chart area grows to fill its card */
+    /* Chart canvas area fills its card */
     .chart{ flex:1 1 0; min-height:0; width:100%; }
 
     /* Holdings tweaks */
@@ -139,7 +140,7 @@
       </aside>
     </section>
 
-    <!-- RIGHT: WRAPPER THAT HOLDS BOTH CHART CARDS (fills height of Signals) -->
+    <!-- RIGHT: charts wrapper (aligned to Signals top via margin-top:40px) -->
     <div id="right-col">
       <!-- OSEBX CARD -->
       <aside class="card" id="osebx">
@@ -161,7 +162,7 @@
       </aside>
     </div>
 
-    <!-- LEFT ROW 2: HOLDINGS (separate area so row 1 height = Signals only) -->
+    <!-- LEFT ROW 2: HOLDINGS -->
     <aside class="card" id="left2">
       <h2 style="margin:0 0 8px">
         Portfolio Holdings
