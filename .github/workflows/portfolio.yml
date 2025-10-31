@@ -1,15 +1,16 @@
 name: Portfolio Builder
 permissions:
-  contents: write        # allow pushing generated JSON/CSV
+  contents: write   # allow pushing generated JSON/CSV back to the repo
 
 on:
   schedule:
-    - cron: "*/30 * * * *"   # every 30 minutes
-  workflow_dispatch:         # manual Run workflow button
+    - cron: "5,35 * * * *"   # run at :05 and :35, i.e., 5 minutes after a :00/:30 scan
+  workflow_dispatch:          # also allow manual runs from the Actions tab
 
 jobs:
   build_portfolio:
     runs-on: ubuntu-latest
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -25,14 +26,11 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # Ensure scan_3day.json exists/fresh for this run
-      - name: Run signal scan
-        run: python stockfetches.py
+      - name: Build portfolio files
+        run: |
+          python portfolio_builder.py
 
-      - name: Run portfolio builder
-        run: python portfolio_builder.py
-
-      - name: Commit and push data files
+      - name: Commit and push portfolio data
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
