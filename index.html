@@ -99,8 +99,95 @@
     #holdings { margin-top: 12px; }
     #holdings table th, #holdings table td { font-size:.9rem; }
   </style>
+
+  <!-- ADDITIONS: Front page styles (non-destructive) -->
+  <style>
+    /* Visibility control: show landing by default; show Fund 1 content when body has .show-fund1 */
+    body:not(.show-fund1) header,
+    body:not(.show-fund1) main,
+    body:not(.show-fund1) footer { display: none; }
+
+    #front-page { display: none; }
+    body:not(.show-fund1) #front-page { display: flex; }
+
+    /* Front page layout */
+    #front-page{
+      min-height:100vh;
+      width:100%;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      padding:48px 24px;
+      position:relative;
+      isolation:isolate;
+    }
+    #front-inner{
+      width:min(960px, 92vw);
+      margin:auto;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:28px;
+      transform: translateY(-6%); /* a little high up */
+    }
+    #front-title{
+      font-weight:700;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      line-height:1.05;
+      color:var(--text);
+      text-shadow: 0 8px 32px rgba(0,0,0,.45);
+    }
+    .front-links{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:24px;
+      width:min(720px, 92vw);
+      margin-top:8px;
+    }
+    .front-links a{
+      flex:1 1 0;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:14px 22px;
+      border-radius:14px;
+      background:linear-gradient(160deg,rgba(14,31,77,.72),rgba(2,8,23,.86));
+      border:1px solid var(--card-border);
+      color:var(--text);
+      text-decoration:none;
+      font-weight:600;
+      transition:transform .15s ease, border-color .15s ease, background .15s ease;
+      backdrop-filter:blur(10px);
+    }
+    .front-links a:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.26);
+    }
+    .front-sub{
+      color:var(--muted);
+      font-size:1rem;
+      margin-top:2px;
+    }
+  </style>
 </head>
 <body>
+
+  <!-- ADDITIONS: Front page markup -->
+  <section id="front-page" aria-label="Landing">
+    <div id="front-inner">
+      <div id="front-title">Squarepoint</div>
+      <div class="front-sub">Select a fund to continue</div>
+      <div class="front-links">
+        <a href="#fund1" data-fund1>Fund 1</a>
+        <a href="#fund2">Fund 2</a>
+        <a href="#fund3">Fund 3</a>
+      </div>
+    </div>
+  </section>
+
   <header>
     <div class="logo">Squarepoint</div>
     <nav>
@@ -256,7 +343,7 @@
       return lines.map(line=>{
         const parts = line.split(',').map(v => v.trim());
         const row = {};
-        headers.forEach((h,i)=>row[h] = parts[i] ?? '');
+        headers.forEach((h,i)=>row[h] = parts[i] ?? '';
         if ('3D_Return' in row) row['3D_Return'] = Number(row['3D_Return']);
         if ('LastPrice' in row) row['LastPrice'] = Number(row['LastPrice']);
         return row;
@@ -422,6 +509,34 @@
     drawOsebx();
     drawPortfolio();
     setInterval(()=>{ drawOsebx(); drawPortfolio(); }, 60_000);
+  </script>
+
+  <!-- ADDITIONS: Tiny script to handle landing → Fund 1 toggle -->
+  <script>
+    (function(){
+      const body = document.body;
+
+      function showFund1(){
+        body.classList.add('show-fund1');
+        // Clean up the hash after navigating to Fund 1 for a nicer URL
+        if (location.hash === '#fund1') {
+          history.replaceState(null, document.title, location.pathname + location.search);
+        }
+      }
+
+      // If URL already has #fund1, open the fund view immediately
+      if (location.hash === '#fund1') {
+        showFund1();
+      }
+
+      // Click handler for the "Fund 1" link on the front page
+      document.addEventListener('click', (e) => {
+        const link = e.target.closest('[data-fund1]');
+        if (!link) return;
+        e.preventDefault();
+        showFund1();
+      });
+    })();
   </script>
 </body>
 </html>
