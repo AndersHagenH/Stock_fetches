@@ -24,28 +24,31 @@
       font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       background:var(--bg-gradient);color:var(--text)
     }
-    header{padding:24px 8vw;display:flex;align-items:center;justify-content:space-between}
+    header{padding:24px clamp(16px, 8vw, 96px);display:flex;align-items:center;justify-content:space-between}
     .logo{font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.95rem}
     nav{display:flex;gap:24px;font-size:.95rem}
     nav a{color:var(--muted);text-decoration:none}
     nav a:hover{color:var(--text)}
 
-    /* ===== LAYOUT: force right column OSEBX on top, Portfolio under ===== */
+    /* ===== Responsive grid with fluid columns and gaps ===== */
     main{
       flex:1;
       display:grid;
-      grid-template-columns:minmax(320px, 620px) 1fr;
+      /* Left column scales between 320px and 560px, otherwise ~28% of viewport width */
+      grid-template-columns: clamp(320px, 28vw, 560px) 1fr;
       grid-template-areas:
         "left right"
         "left right2";
-      gap:48px;
-      padding:0 8vw 10vh;
+      gap: clamp(20px, 4vw, 48px);
+      padding: 0 clamp(16px, 8vw, 96px) 10vh;
+      max-width: 1400px;
+      margin: 0 auto;
     }
     section{ grid-area:left; }
     #osebx{ grid-area:right; }
     #portfolio{ grid-area:right2; }
 
-    /* Stack on smaller screens: left (signals+holdings) -> OSEBX -> Portfolio */
+    /* Stack on smaller screens in the order: left → OSEBX → Portfolio */
     @media (max-width:1024px){
       main{
         grid-template-columns:1fr;
@@ -53,9 +56,10 @@
           "left"
           "right"
           "right2";
+        max-width: 980px;
       }
     }
-    @media (max-width:640px){ main{gap:28px;padding-bottom:64px} }
+    @media (max-width:640px){ main{ padding-bottom: 64px; } }
 
     .eyebrow{display:inline-flex;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(51,226,160,.12);border:1px solid rgba(51,226,160,.32);color:var(--accent);font-size:.78rem;letter-spacing:.14em;margin-bottom:18px;text-transform:uppercase}
     h1{font-size:clamp(2.2rem,4vw,3.8rem);line-height:1.1;margin:0 0 18px}
@@ -66,15 +70,19 @@
       backdrop-filter:blur(10px)
     }
     .table-wrap{width:100%;overflow-x:auto;margin-top:10px}
-    table{border-collapse:collapse;width:100%;font-size:.95rem}
+    table{border-collapse:collapse;width:100%;font-size: clamp(.88rem, .9vw, .95rem)}
     th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left}
     th{background:rgba(255,255,255,.06)}
     .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:600;font-size:.82rem}
     .buy{background:rgba(51,226,160,.24);border:1px solid rgba(51,226,160,.6);color:var(--text)}
     .hold{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--text)}
-    footer{padding:36px 8vw 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
+    footer{padding:36px clamp(16px, 8vw, 96px) 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,.06)}
 
-    /* Holdings table tweaks */
+    /* Chart containers: fluid aspect ratio instead of fixed heights */
+    .chart { width:100%; aspect-ratio: 16 / 6; }
+    @media (max-width:1024px){ .chart { aspect-ratio: 16 / 9; } }
+
+    /* Holdings tweaks */
     #holdings { margin-top: 12px; }
     #holdings table th, #holdings table td { font-size:.9rem; }
   </style>
@@ -147,10 +155,10 @@
     </section>
 
     <!-- RIGHT COLUMN -->
-    <aside class="card" id="osebx" style="max-height:380px; overflow:hidden;">
+    <aside class="card" id="osebx">
       <h2 style="margin:0 0 8px">OSEBX (1y)</h2>
       <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-      <div style="height:260px;margin-top:8px">
+      <div class="chart" style="margin-top:8px">
         <canvas id="osebx-chart"></canvas>
       </div>
       <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
@@ -159,7 +167,7 @@
     <aside class="card" id="portfolio" style="align-self:start;">
       <h2 style="margin:0 0 8px">Portfolio NAV</h2>
       <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-      <div style="height:320px;margin-top:8px">
+      <div class="chart" style="margin-top:8px">
         <canvas id="portfolio-chart"></canvas>
       </div>
     </aside>
@@ -170,7 +178,7 @@
   </footer>
 
   <script>
-    // Base path for data files (works on GitHub Pages and locally)
+    // Base path (works on GitHub Pages and locally)
     const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
     const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
 
