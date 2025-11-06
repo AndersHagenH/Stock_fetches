@@ -31,13 +31,10 @@ MAX_POSITIONS = 10
 
 # ====== IO HELPERS ======
 def _today_date(scan_rows) -> str:
-    # Prefer the scan Date field if present and consistent; else use UTC today.
-    # Expect format "YYYY-MM-DD" in scan.
     try:
         dates = {r.get("Date") for r in scan_rows if r.get("Date")}
         if len(dates) == 1:
             d = list(dates)[0]
-            # sanitize
             return pd.to_datetime(d).strftime("%Y-%m-%d")
     except Exception:
         pass
@@ -48,17 +45,16 @@ def load_scan():
         raise FileNotFoundError(f"Missing {SCAN_JSON}. Run the signal script first.")
     with open(SCAN_JSON, "r", encoding="utf-8") as f:
         data = json.load(f)
-    # Expect an array of objects; filter valid rows
     rows = []
     for r in data:
         t = r.get("Ticker")
         p = r.get("LastPrice")
-        s = r.get("Status")
+        s = r.get("Signal")  # CHANGED from "Status"
         if not t or p is None or s is None:
             continue
         rows.append({
             "Ticker": str(t),
-            "Status": str(s),
+            "Status": str(s).upper(),  # CHANGED: normalize Signal to Status uppercase
             "LastPrice": float(p),
             "Date": r.get("Date"),
             "ExitReason": r.get("ExitReason")
@@ -67,10 +63,9 @@ def load_scan():
 
 def load_state():
     if not os.path.exists(STATE_JSON):
-        # initialize
         state = {
             "cash": START_NAV_NOK,
-            "positions": {},    # ticker -> {qty, entry_price, entry_date, stake_nok}
+            "positions": {},
             "max_slots": MAX_POSITIONS,
             "stake_nok": STAKE_NOK,
             "fee_buy": FEE_BUY,
@@ -120,27 +115,23 @@ def process_signals():
 
     today = _today_date(scan)
 
-    # Map ticker -> latest row
     by_ticker = {r["Ticker"]: r for r in scan}
 
-    # 1) SELL first (free up slots & cash)
+    # 1) SELL
     sell_candidates = [t for t, r in by_ticker.items() if r["Status"] == "SELL" and t in state["positions"]]
     for ticker in sorted(sell_candidates):
         pos = state["positions"][ticker]
         last_price = by_ticker[ticker]["LastPrice"]
         qty = float(pos["qty"])
         proceeds = qty * last_price
-        # Update cash: add proceeds minus sell fee
         state["cash"] += proceeds - FEE_SELL
 
-        # Compute P&L (include both buy and sell fees)
         stake = float(pos["stake_nok"])
         fees_total = FEE_BUY + FEE_SELL
         pl_nok = (proceeds - stake) - fees_total
         pl_pct = pl_nok / stake if stake != 0 else 0.0
         reason = by_ticker[ticker].get("ExitReason") or "SELL"
 
-        # Append to trade log
         new_row = pd.DataFrame([{
             "Ticker": ticker,
             "EntryDate": pos["entry_date"],
@@ -156,36 +147,30 @@ def process_signals():
         }])
         trade_log = pd.concat([trade_log, new_row], ignore_index=True)
 
-        # Remove position
         del state["positions"][ticker]
 
-    # Dedup trade log: (Ticker, EntryDate, ExitDate)
     if not trade_log.empty:
         for c in ["EntryDate","ExitDate"]:
             trade_log[c] = pd.to_datetime(trade_log[c]).dt.strftime("%Y-%m-%d")
         trade_log = trade_log.drop_duplicates(subset=["Ticker","EntryDate","ExitDate"], keep="first")
         trade_log = trade_log.sort_values(["Ticker","EntryDate","ExitDate"]).reset_index(drop=True)
 
-    # 2) BUYs (respect capacity and cash)
+    # 2) BUY
     current_slots = len(state["positions"])
     free_slots = max(0, state["max_slots"] - current_slots)
-    # candidates where not already holding and Status == BUY
     buy_candidates = [t for t, r in by_ticker.items() if r["Status"] == "BUY" and t not in state["positions"]]
-    # deterministic order: alphabetical (simple)
     buy_candidates = sorted(buy_candidates)
 
     for ticker in buy_candidates:
         if free_slots <= 0:
             break
         if state["cash"] < (STAKE_NOK + FEE_BUY):
-            # not enough cash to take a normal stake; skip (simple rule)
             continue
         last_price = by_ticker[ticker]["LastPrice"]
         if last_price <= 0:
             continue
         qty = STAKE_NOK / last_price
 
-        # Deduct cash for stake + fee
         state["cash"] -= (STAKE_NOK + FEE_BUY)
         state["positions"][ticker] = {
             "qty": float(qty),
@@ -195,14 +180,13 @@ def process_signals():
         }
         free_slots -= 1
 
-    # 3) Compute today NAV using latest LastPrice for all tickers we hold
+    # 3) NAV
     nav = float(state["cash"])
     for ticker, pos in state["positions"].items():
-        # Prefer today's LastPrice from scan; if missing, value at entry price
         px = by_ticker.get(ticker, {}).get("LastPrice", pos["entry_price"])
         nav += float(pos["qty"]) * float(px)
 
-    # 4) Update portfolio_nav.json (one point per date; overwrite today's if exists)
+    # 4) NAV log
     nav_df = read_portfolio_nav()
     if nav_df.empty:
         nav_df = pd.DataFrame([{"date": today, "nav": nav}])
@@ -210,12 +194,12 @@ def process_signals():
         nav_df = nav_df[nav_df["date"] != today]
         nav_df = pd.concat([nav_df, pd.DataFrame([{"date": today, "nav": nav}])], ignore_index=True)
 
-    # 5) Persist everything
+    # 5) Save
     save_state(state)
     write_trade_log(trade_log)
     write_portfolio_nav(nav_df)
 
-    # Console summary
+    # Console output
     print(f"[{today}] NAV: {nav:,.2f} NOK | Cash: {state['cash']:,.2f} NOK | Positions: {len(state['positions'])}")
     if state["positions"]:
         print(" Open positions:")
@@ -224,4 +208,3 @@ def process_signals():
 
 if __name__ == "__main__":
     process_signals()
-
