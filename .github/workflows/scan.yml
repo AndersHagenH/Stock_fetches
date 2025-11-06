@@ -2,7 +2,7 @@ name: Update 3-day scan
 
 on:
   schedule:
-    - cron: "0 17 * * 1-5"   # 17:00 UTC → 18:00 CET / 19:00 CEST
+    - cron: "0 * * * 1-5"   # every hour, Monday–Friday (UTC)
   workflow_dispatch:
 
 jobs:
@@ -10,8 +10,19 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - uses: actions/checkout@v4
+
+      # --- Time filter: skip runs outside 08–18 Europe/Oslo ---
+      - name: Skip if outside 08–18 Europe/Oslo
+        run: |
+          hour=$(TZ=Europe/Oslo date +%H)
+          if [ "$hour" -lt 8 ] || [ "$hour" -gt 18 ]; then
+            echo "Outside 08–18 Europe/Oslo; skipping."
+            exit 0
+          fi
+          echo "Within allowed hours ($hour), continuing."
 
       - uses: actions/setup-python@v5
         with:
@@ -27,7 +38,6 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          ls -lah public/data || true
           git add public/data/scan_3day.json public/data/scan_3day.csv || true
           git commit -m "update scan data" || echo "no changes"
           git push
