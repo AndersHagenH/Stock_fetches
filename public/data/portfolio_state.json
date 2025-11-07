@@ -1,10 +1,16 @@
 {
-  "cash": 44971.0,
+  "cash": 39942.0,
   "positions": {
     "EPR.OL": {
       "qty": 59.171597633136095,
       "entry_price": 84.5,
       "entry_date": "2025-11-05",
+      "stake_nok": 5000.0
+    },
+    "PROT.OL": {
+      "qty": 11.148272017837236,
+      "entry_price": 448.5,
+      "entry_date": "2025-11-07",
       "stake_nok": 5000.0
     }
   },
