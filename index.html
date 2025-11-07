@@ -241,6 +241,9 @@
         <span id="nav-pill" class="badge hold" style="margin-left:8px">
           NAV: <span id="nav-number">—</span> NOK
         </span>
+        <span id="pl-pill" class="badge hold" style="margin-left:8px">
+          P&amp;L: <span id="nav-pl-pct">—</span>
+        </span>
       </h2>
       <div id="holdings" class="table-wrap">
         <table aria-label="Current holdings">
@@ -338,9 +341,22 @@
         if(!r.ok) return;
         const arr = await r.json();
         if(Array.isArray(arr) && arr.length){
-          const lastNav = +arr[arr.length-1].nav;
+          const first = arr[0];
+          const last  = arr[arr.length-1];
+
+          // Set latest NAV
           const el = document.getElementById('nav-number');
-          if(el) el.textContent = fmtNok(lastNav);
+          if(el) el.textContent = fmtNok(+last.nav);
+
+          // Use last.pl_pct if present; fallback to cumulative from first->last
+          let plPct = Number(last.pl_pct);
+          if (!Number.isFinite(plPct)) {
+            const firstNav = +first.nav, lastNav = +last.nav;
+            plPct = firstNav > 0 ? (lastNav/firstNav - 1) : 0;
+          }
+
+          const plPctEl = document.getElementById('nav-pl-pct');
+          if (plPctEl) plPctEl.textContent = fmtPct(plPct);
         }
       }catch(e){}
     }
