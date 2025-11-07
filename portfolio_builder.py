@@ -22,6 +22,8 @@ SCAN_JSON = os.path.join(OUTPUT_DIR, "scan_3day.json")
 STATE_JSON = os.path.join(OUTPUT_DIR, "portfolio_state.json")
 TRADE_LOG_CSV = os.path.join(OUTPUT_DIR, "trade_log.csv")
 PORTFOLIO_NAV_JSON = os.path.join(OUTPUT_DIR, "portfolio_nav.json")
+# NEW: header summary used by the UI to render NAV and P&L (%) boxes
+PORTFOLIO_SUMMARY_JSON = os.path.join(OUTPUT_DIR, "portfolio_summary.json")
 
 START_NAV_NOK = 50_000.0
 STAKE_NOK = 5_000.0
@@ -104,6 +106,20 @@ def write_portfolio_nav(df: pd.DataFrame):
     df = df.sort_values("date")
     with open(PORTFOLIO_NAV_JSON, "w", encoding="utf-8") as f:
         json.dump([{"date": d, "nav": float(n)} for d, n in df[["date","nav"]].values], f, indent=2)
+
+# NEW: write compact summary for header boxes
+def write_portfolio_summary(date: str, nav: float, start_nav: float):
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    pl_nok = nav - start_nav
+    pl_pct = (pl_nok / start_nav) if start_nav else 0.0
+    payload = {
+        "date": date,
+        "nav": float(nav),
+        "pl_nok": float(pl_nok),
+        "pl_pct": float(pl_pct)  # e.g., 0.0123 -> 1.23%
+    }
+    with open(PORTFOLIO_SUMMARY_JSON, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
 
 # ====== CORE ======
 def process_signals():
@@ -199,7 +215,10 @@ def process_signals():
     write_trade_log(trade_log)
     write_portfolio_nav(nav_df)
 
-    # Console output
+    # NEW: write header summary (NAV + P&L vs start)
+    write_portfolio_summary(today, nav, state["start_nav"])
+
+    # Console output (unchanged)
     print(f"[{today}] NAV: {nav:,.2f} NOK | Cash: {state['cash']:,.2f} NOK | Positions: {len(state['positions'])}")
     if state["positions"]:
         print(" Open positions:")
