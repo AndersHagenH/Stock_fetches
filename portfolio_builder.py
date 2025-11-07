@@ -22,7 +22,6 @@ SCAN_JSON = os.path.join(OUTPUT_DIR, "scan_3day.json")
 STATE_JSON = os.path.join(OUTPUT_DIR, "portfolio_state.json")
 TRADE_LOG_CSV = os.path.join(OUTPUT_DIR, "trade_log.csv")
 PORTFOLIO_NAV_JSON = os.path.join(OUTPUT_DIR, "portfolio_nav.json")
-# NEW: header summary used by the UI to render NAV and P&L (%) boxes
 PORTFOLIO_SUMMARY_JSON = os.path.join(OUTPUT_DIR, "portfolio_summary.json")
 
 START_NAV_NOK = 50_000.0
@@ -51,12 +50,12 @@ def load_scan():
     for r in data:
         t = r.get("Ticker")
         p = r.get("LastPrice")
-        s = r.get("Signal")  # CHANGED from "Status"
+        s = r.get("Signal")
         if not t or p is None or s is None:
             continue
         rows.append({
             "Ticker": str(t),
-            "Status": str(s).upper(),  # CHANGED: normalize Signal to Status uppercase
+            "Status": str(s).upper(),
             "LastPrice": float(p),
             "Date": r.get("Date"),
             "ExitReason": r.get("ExitReason")
@@ -102,12 +101,21 @@ def read_portfolio_nav() -> pd.DataFrame:
             return pd.DataFrame(arr)
     return pd.DataFrame(columns=["date","nav"])
 
+# ✅ MODIFIED: write pl_pct to portfolio_nav.json
 def write_portfolio_nav(df: pd.DataFrame):
     df = df.sort_values("date")
+    out = []
+    for _, row in df.iterrows():
+        nav = float(row["nav"])
+        pl_pct = (nav - START_NAV_NOK) / START_NAV_NOK if START_NAV_NOK else 0.0
+        out.append({
+            "date": row["date"],
+            "nav": nav,
+            "pl_pct": pl_pct
+        })
     with open(PORTFOLIO_NAV_JSON, "w", encoding="utf-8") as f:
-        json.dump([{"date": d, "nav": float(n)} for d, n in df[["date","nav"]].values], f, indent=2)
+        json.dump(out, f, indent=2)
 
-# NEW: write compact summary for header boxes
 def write_portfolio_summary(date: str, nav: float, start_nav: float):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     pl_nok = nav - start_nav
@@ -116,7 +124,7 @@ def write_portfolio_summary(date: str, nav: float, start_nav: float):
         "date": date,
         "nav": float(nav),
         "pl_nok": float(pl_nok),
-        "pl_pct": float(pl_pct)  # e.g., 0.0123 -> 1.23%
+        "pl_pct": float(pl_pct)
     }
     with open(PORTFOLIO_SUMMARY_JSON, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
@@ -214,11 +222,8 @@ def process_signals():
     save_state(state)
     write_trade_log(trade_log)
     write_portfolio_nav(nav_df)
-
-    # NEW: write header summary (NAV + P&L vs start)
     write_portfolio_summary(today, nav, state["start_nav"])
 
-    # Console output (unchanged)
     print(f"[{today}] NAV: {nav:,.2f} NOK | Cash: {state['cash']:,.2f} NOK | Positions: {len(state['positions'])}")
     if state["positions"]:
         print(" Open positions:")
