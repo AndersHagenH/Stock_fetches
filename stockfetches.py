@@ -204,7 +204,7 @@ def main():
         how="left",
     )
 
-    # Kode 1 forventer Signal som BUY/HOLD; mapp fra Status
+ # Kode 1 forventer Signal som BUY/HOLD; mapp fra Status
 def status_to_signal(s: str) -> str:
     if s == "BUY":
         return "BUY"
@@ -213,20 +213,41 @@ def status_to_signal(s: str) -> str:
     return "HOLD"
 
 
+# ---------- Main: produser Kode 1-kompatibel eksport ----------
+def main():
+    price_data = load_prices(TICKERS, START_DATE, END_DATE, USE_ADJUSTED)
+    price_data = price_data.dropna(how="all", axis=1)
+    if price_data.empty:
+        raise RuntimeError("No price data downloaded; check tickers or date range.")
+
+    snapshot_df = build_snapshot(price_data)
+
+    # 3-dagers retur (som i Kode 1)
+    three_day_rets = price_data.pct_change(LOOKBACK_DAYS_EXPORT).iloc[-1]
+    three_day_rets.name = "3D_Return"
+
+    # Slå sammen slik at vi kan eksportere de gamle feltene
+    out = snapshot_df.merge(
+        three_day_rets,
+        left_on="Ticker",
+        right_index=True,
+        how="left",
+    )
+
+    # Mapp Status → BUY/HOLD/SELL
     out["Signal"] = out["Status"].map(status_to_signal)
 
-    # Kode 1s Date-felt: "YYYY-MM-DD HH:MM UTC" (bruk TimeUTC vi allerede har)
-    # snapshot_df har Date=YYYY-MM-DD og TimeUTC=HH:MM UTC → slå sammen
+    # Lag Kode 1-formatert Date-felt ("YYYY-MM-DD HH:MM UTC")
     out["Date"] = out["Date"].astype(str) + " " + out["TimeUTC"].astype(str)
 
-    # Kode 1-orden og presisjonsjustering
+    # Justeringer og kolonnerekkefølge
     out["LastPrice"] = out["LastPrice"].round(6)
     out = out[["Ticker", "3D_Return", "Signal", "LastPrice", "Date"]].copy()
 
-    # Sorter likt som Kode 1 (etter 3D_Return)
+    # Sorter etter retur
     out = out.sort_values("3D_Return")
 
-    # ===== Save outputs med samme filnavn som Kode 1 =====
+    # ===== Save outputs =====
     csv_path = os.path.join(OUTPUT_DIR, "scan_3day.csv")
     json_path = os.path.join(OUTPUT_DIR, "scan_3day.json")
 
@@ -237,6 +258,7 @@ def status_to_signal(s: str) -> str:
     print("\n=== Export (Kode 1-kompatibel) ===")
     print(out.head().to_string(index=False))
     print(f"\nSaved results to:\n - {csv_path}\n - {json_path}")
+
 
 if __name__ == "__main__":
     main()
