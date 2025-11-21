@@ -441,6 +441,29 @@
         if(!labels.length) throw new Error('No OSEBX data');
 
        //before this line contained: meta.textContent = `As of ${o.as_of || o.asOf || ''} (source: ${o.ticker || 'OSEBX.OL'})`;
+       // now the block under finds the P&L for the OSEBX index from 2025-11-03
+      // ---- NEW: ONLY show P&L since 2025-11-03 ----
+const BASE_DATE = '2025-11-03';
+let plLine = '';
+
+const baseRow = rows.find(p => (p.t || p.date) === BASE_DATE);
+const lastRow = rows[rows.length - 1];
+
+if (baseRow && lastRow) {
+  const basePrice = Number(baseRow.close ?? baseRow.Close ?? baseRow.c);
+  const lastPrice = Number(lastRow.close ?? lastRow.Close ?? lastRow.c);
+
+  if (Number.isFinite(basePrice) && Number.isFinite(lastPrice) && basePrice > 0) {
+    const plPct = (lastPrice / basePrice - 1) * 100;
+    const sign  = plPct >= 0 ? '+' : '';
+    plLine = `P&L since ${BASE_DATE}: ${sign}${plPct.toFixed(2)}%`;
+  }
+}
+
+// Write only P&L (one line)
+meta.textContent = plLine || '';
+// ---- END NEW PART ----
+
 
 
         new Chart(ctx,{
