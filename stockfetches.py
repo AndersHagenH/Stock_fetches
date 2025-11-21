@@ -204,29 +204,40 @@ def main():
         how="left",
     )
 
- # Kode 1 forventer Signal som BUY/HOLD; mapp fra Status
-def status_to_signal(s: str) -> str:
-    if s == "BUY":
+import json
+
+# Kode 1 forventer Signal som BUY/HOLD; mapp fra Status
+def status_to_signal(status: str) -> str:
+    if status == "BUY":
         return "BUY"
-    if s == "SELL":
+    if status == "SELL":
         return "SELL"
     return "HOLD"
 
 
-# ---------- Main: produser Kode 1-kompatibel eksport ----------
 def main():
+    # ---- Load price data ----
     price_data = load_prices(TICKERS, START_DATE, END_DATE, USE_ADJUSTED)
     price_data = price_data.dropna(how="all", axis=1)
     if price_data.empty:
-        raise RuntimeError("No price data downloaded; check tickers or date range.")
+        raise RuntimeError("No price data downloaded.")
 
     snapshot_df = build_snapshot(price_data)
 
-    # 3-dagers retur (som i Kode 1)
+    # ---- Load REAL portfolio state ----
+    portfolio_path = os.path.join(OUTPUT_DIR, "portfolio_state.json")
+    if os.path.exists(portfolio_path):
+        with open(portfolio_path, "r") as f:
+            portfolio_state = json.load(f)
+        real_positions = portfolio_state.get("positions", {})
+    else:
+        real_positions = {}   # no positions yet
+
+    # ---- Compute 3-day return ----
     three_day_rets = price_data.pct_change(LOOKBACK_DAYS_EXPORT).iloc[-1]
     three_day_rets.name = "3D_Return"
 
-    # Slå sammen slik at vi kan eksportere de gamle feltene
+    # ---- Merge model results and returns ----
     out = snapshot_df.merge(
         three_day_rets,
         left_on="Ticker",
@@ -234,30 +245,51 @@ def main():
         how="left",
     )
 
-    # Mapp Status → BUY/HOLD/SELL
+    # ---- Override signals using REAL portfolio P&L ----
+    for idx, row in out.iterrows():
+        ticker = row["Ticker"]
+        last_price = row["LastPrice"]
+
+        # If ticker is in portfolio → apply HOLD/SELL rules
+        if ticker in real_positions:
+            entry_price = float(real_positions[ticker]["entry_price"])
+            real_pl_pct = (last_price / entry_price - 1.0) if entry_price > 0 else 0
+
+            # Real SELL rule
+            if real_pl_pct >= 0.05:
+                out.at[idx, "Status"] = "SELL"
+            else:
+                out.at[idx, "Status"] = "HOLD"
+
+        # If not in portfolio:
+        else:
+            # Keep BUY signal from model
+            if row["Status"] == "BUY":
+                continue
+            else:
+                out.at[idx, "Status"] = "HOLD"
+
+    # ---- Convert Status → Signal ----
     out["Signal"] = out["Status"].map(status_to_signal)
 
-    # Lag Kode 1-formatert Date-felt ("YYYY-MM-DD HH:MM UTC")
+    # ---- Build Kode 1 date string ----
     out["Date"] = out["Date"].astype(str) + " " + out["TimeUTC"].astype(str)
 
-    # Justeringer og kolonnerekkefølge
+    # ---- Final formatting ----
     out["LastPrice"] = out["LastPrice"].round(6)
     out = out[["Ticker", "3D_Return", "Signal", "LastPrice", "Date"]].copy()
-
-    # Sorter etter retur
     out = out.sort_values("3D_Return")
 
-    # ===== Save outputs =====
+    # ---- Save JSON + CSV ----
     csv_path = os.path.join(OUTPUT_DIR, "scan_3day.csv")
     json_path = os.path.join(OUTPUT_DIR, "scan_3day.json")
 
     out.to_csv(csv_path, index=False)
     out.to_json(json_path, orient="records", indent=2)
 
-    # Konsollvisning
-    print("\n=== Export (Kode 1-kompatibel) ===")
+    print("\n=== Export with REAL portfolio signals ===")
     print(out.head().to_string(index=False))
-    print(f"\nSaved results to:\n - {csv_path}\n - {json_path}")
+    print(f"Saved to:\n - {csv_path}\n - {json_path}")
 
 
 if __name__ == "__main__":
