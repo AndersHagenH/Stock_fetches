@@ -2,7 +2,8 @@ name: update-osebx
 
 on:
   schedule:
-    - cron: "15 12 * * 1-5"   # Weekdays ~12:15 UTC
+    - cron: "0 18 * * 1-5"
+
   workflow_dispatch: {}        # Allow manual runs
 
 # Grant write permission ONLY for this workflow (repo-wide default can stay read-only)
