@@ -502,7 +502,9 @@
 
     drawOsebx();
     drawPortfolio();
-    setInterval(()=>{ drawOsebx(); drawPortfolio(); }, 60_000);
+    // No interval needed — OSEBX updates once per day.
+// drawOsebx(); drawPortfolio();  // Already called above
+
   </script>
 
   <!-- FIXED SCRIPT: re-run data + charts after Fund 1 becomes visible -->
