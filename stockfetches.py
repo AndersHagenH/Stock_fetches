@@ -205,8 +205,13 @@ def main():
     )
 
     # Kode 1 forventer Signal som BUY/HOLD; mapp fra Status
-    def status_to_signal(s: str) -> str:
-        return "BUY" if s == "BUY" else "HOLD"
+def status_to_signal(s: str) -> str:
+    if s == "BUY":
+        return "BUY"
+    if s == "SELL":
+        return "SELL"
+    return "HOLD"
+
 
     out["Signal"] = out["Status"].map(status_to_signal)
 
