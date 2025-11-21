@@ -440,7 +440,8 @@
         const closes = rows.map(p => p.close ?? p.Close ?? p.c);
         if(!labels.length) throw new Error('No OSEBX data');
 
-        meta.textContent = `As of ${o.as_of || o.asOf || ''} (source: ${o.ticker || 'OSEBX.OL'})`;
+       //before this line contained: meta.textContent = `As of ${o.as_of || o.asOf || ''} (source: ${o.ticker || 'OSEBX.OL'})`;
+
 
         new Chart(ctx,{
           type:'line',
