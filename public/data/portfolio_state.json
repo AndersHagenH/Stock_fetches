@@ -1,16 +1,10 @@
 {
-  "cash": 25047.836120401338,
+  "cash": 30283.54200275428,
   "positions": {
     "EPR.OL": {
       "qty": 59.171597633136095,
       "entry_price": 84.5,
       "entry_date": "2025-11-05",
-      "stake_nok": 5000.0
-    },
-    "AFG.OL": {
-      "qty": 29.41176470588235,
-      "entry_price": 170.0,
-      "entry_date": "2025-11-13",
       "stake_nok": 5000.0
     },
     "DNB.OL": {
