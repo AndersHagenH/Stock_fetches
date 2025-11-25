@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fund 2 — H² Investors</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      color-scheme: light;
+      --bg-gradient: radial-gradient(circle at top, #0e1f4d 0%, #020817 50%, #010513 100%);
+      --card-bg: rgba(255,255,255,0.08);
+      --card-border: rgba(255,255,255,0.12);
+      --accent:#33e2a0;
+      --blue:#62b0ff;
+      --text:#f8fbff;
+      --muted:rgba(248,251,255,0.68);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;min-height:100vh;display:flex;flex-direction:column;
+      font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:var(--bg-gradient);color:var(--text)
+    }
+    header{
+      padding:24px clamp(16px, 8vw, 96px);
+      display:flex;align-items:center;justify-content:space-between
+    }
+    .logo{font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.95rem}
+    nav{display:flex;gap:24px;font-size:.95rem}
+    nav a{color:var(--muted);text-decoration:none}
+    nav a:hover{color:var(--text)}
+
+    main{
+      flex:1;
+      padding:0 8vw 10vh;
+      display:flex;
+      flex-direction:column;
+      gap:40px;
+      max-width:900px;
+      margin:auto;
+    }
+
+    .eyebrow{
+      display:inline-flex;gap:8px;padding:6px 14px;border-radius:999px;
+      background:rgba(51,226,160,.12);border:1px solid rgba(51,226,160,.32);
+      color:var(--accent);font-size:.78rem;letter-spacing:.14em;
+      margin-bottom:18px;text-transform:uppercase
+    }
+
+    h1{font-size:clamp(2.2rem,4vw,3.2rem);line-height:1.1;margin:0 0 18px}
+    p{color:var(--muted);font-size:1.05rem;max-width:680px}
+
+    .card{
+      padding:24px;border-radius:20px;border:1px solid var(--card-border);
+      background:linear-gradient(160deg,rgba(14,31,77,.72),rgba(2,8,23,.86));
+      backdrop-filter:blur(10px)
+    }
+    .signal-label{color:var(--muted);font-size:.95rem;margin-bottom:8px}
+
+    table{width:100%;border-collapse:collapse;margin-top:16px;font-size:.92rem}
+    th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.12)}
+    th{background:rgba(255,255,255,.06);text-align:left}
+
+    footer{
+      padding:36px clamp(16px, 8vw, 96px) 40px;
+      color:var(--muted);font-size:.88rem;text-align:center;
+      border-top:1px solid rgba(255,255,255,0.06)
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">H<sup>2</sup> Investors</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="#signal">Signal</a>
+  </nav>
+</header>
+
+<main>
+
+  <div class="eyebrow">Fund 2</div>
+  <h1>End-of-Month Strategy Signal</h1>
+  <p>Signals are generated only on the 5th last trading day of each month.</p>
+
+  <aside class="card" id="signal-card">
+    <h2 style="margin:0 0 12px">Latest Signal</h2>
+    <div id="signal-content" class="signal-label">Loading…</div>
+  </aside>
+
+</main>
+
+<footer>
+  © 2025 H<sup>2</sup> Investors · Strategy auto-updated by GitHub Actions
+</footer>
+
+<script>
+  const onProjectPage = location.hostname.endsWith('github.io') &&
+                        location.pathname.includes('/Stock_fetches/');
+  const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
+  const EOM_URL = BASE + 'public/data/eom_strategy.json';
+
+  async function loadSignal(){
+    const box = document.getElementById('signal-content');
+
+    try{
+      const res = await fetch(EOM_URL + '?t=' + Date.now(), { cache:'no-store' });
+
+      if (!res.ok){
+        box.textContent = "No signal today.";
+        return;
+      }
+
+      const data = await res.json();
+
+      // If JSON is empty or missing expected fields
+      if (!data || !data.entry_date){
+        box.textContent = "No signal today.";
+        return;
+      }
+
+      // Build HTML for signal
+      let html = `
+        <div><strong>Generated:</strong> ${data.date_generated}</div>
+        <div><strong>Entry Date:</strong> ${data.entry_date}</div>
+        <div><strong>Exit Date:</strong> ${data.exit_date}</div>
+        <br>
+        <div><strong>Tickers:</strong></div>
+        <table>
+          <thead>
+            <tr><th>Ticker</th><th>Entry Price</th></tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (const t of data.tickers){
+        const px = data.entry_prices[t];
+        html += `<tr><td>${t}</td><td>${px.toFixed(4)}</td></tr>`;
+      }
+
+      html += `</tbody></table>`;
+
+      box.innerHTML = html;
+
+    }catch(err){
+      box.textContent = "No signal today.";
+    }
+  }
+
+  loadSignal();
+</script>
+
+</body>
+</html>
