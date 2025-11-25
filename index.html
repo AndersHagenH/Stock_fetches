@@ -147,11 +147,16 @@
 
     /* ---------- FUND 2 PAGE ---------- */
     #fund2-page{
-      display:none;
-      padding:0 8vw;
-      margin-top:160px;
-      min-height:100vh;
-    }
+  display:none;
+  padding:0 8vw;
+  margin-top:80px;   /* Moves content higher */
+  min-height:100vh;
+}
+
+#fund2-inner{
+  max-width:720px;   /* Aligns Fund 2 with Fund 1 */
+}
+
 
     body.show-fund2 #fund2-page { display:block; }
     body.show-fund2 main { display:none; }
