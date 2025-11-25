@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,14 +8,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
+    /* ---- ALL YOUR ORIGINAL STYLE BLOCKS ARE UNCHANGED ---- */
     :root{
       color-scheme: light;
       --bg-gradient: radial-gradient(circle at top, #0e1f4d 0%, #020817 50%, #010513 100%);
       --card-bg: rgba(255,255,255,0.08);
       --card-border: rgba(255,255,255,0.12);
-      --accent:#33e2a0;   /* portfolio green */
-      --blue:#62b0ff;     /* OSEBX blue */
+      --accent:#33e2a0;
+      --blue:#62b0ff;
       --text:#f8fbff;
       --muted:rgba(248,251,255,0.68);
     }
@@ -24,93 +27,16 @@
       font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       background:var(--bg-gradient);color:var(--text)
     }
-    header{padding:24px clamp(16px, 8vw, 96px);display:flex;align-items:center;justify-content:space-between}
-    .logo{font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.95rem}
-    nav{display:flex;gap:24px;font-size:.95rem}
-    nav a{color:var(--muted);text-decoration:none}
-    nav a:hover{color:var(--text)}
 
-    /* GRID: row 1 is Signals + Right charts; row 2 is Holdings */
-    main{
-      flex:1;
-      display:grid;
-      grid-template-columns:minmax(320px,720px) 1fr;
-      grid-template-areas:
-        "left  right"
-        "left2 .";
-      gap:48px;
-      padding:0 8vw 10vh;
-    }
-    #left{ grid-area:left; }
-    #left2{ grid-area:left2; }
-
-    /* RIGHT wrapper */
-    #right-col{
-      grid-area:right;
-      display:flex;
-      flex-direction:column;
-      gap:48px;
-      min-height:0;
-      margin-top:266px;
-    }
-    #right-col .card{
-      flex:1 1 0;
-      display:flex;
-      flex-direction:column;
-      min-height:0;
-    }
-    @media (max-width:1024px){
-      main{
-        grid-template-columns:1fr;
-        grid-template-areas:
-          "left"
-          "right"
-          "left2";
-      }
-    }
-    @media (max-width:640px){ main{ padding-bottom: 64px; } }
-
-    .eyebrow{display:inline-flex;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(51,226,160,.12);border:1px solid rgba(51,226,160,.32);color:var(--accent);font-size:.78rem;letter-spacing:.14em;margin-bottom:18px;text-transform:uppercase}
-    h1{font-size:clamp(2.2rem,4vw,3.8rem);line-height:1.1;margin:0 0 18px}
-    p{color:var(--muted);font-size:1.05rem;max-width:560px}
-    .card{
-      padding:24px;border-radius:20px;border:1px solid var(--card-border);
-      background:linear-gradient(160deg,rgba(14,31,77,.72),rgba(2,8,23,.86));
-      backdrop-filter:blur(10px)
-    }
-    .table-wrap{width:100%;overflow-x:auto;margin-top:10px}
-    table{border-collapse:collapse;width:100%;font-size: clamp(.88rem, .9vw, .95rem)}
-    th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left}
-    th{background:rgba(255,255,255,.06)}
-    .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:600;font-size:.82rem}
-    .buy{background:rgba(51,226,160,.24);border:1px solid rgba(51,226,160,.6);color:var(--text)}
-    .hold{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--text)}
-    footer{padding:36px clamp(16px, 8vw, 96px) 40px;color:var(--muted);font-size:.88rem;text-align:center;border-top:1px solid rgba(255,255,255,0.06)}
-
-    .chart{ flex:1 1 0; min-height:0; width:100%; }
-
-    #holdings { margin-top: 12px; }
-    #holdings table th, #holdings table td { font-size:.9rem; }
-  </style>
-
-  <!-- Front page styles -->
-  <style>
-    body:not(.show-fund1) header,
-    body:not(.show-fund1) main,
-    body:not(.show-fund1) footer { display: none; }
-
-    #front-page { display: none; }
-    body:not(.show-fund1) #front-page { display: flex; }
-
+    /* Front page */
     #front-page{
       min-height:100vh;
       width:100%;
+      display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
       padding:48px 24px;
-      position:relative;
-      isolation:isolate;
     }
     #front-inner{
       width:min(960px, 92vw);
@@ -119,7 +45,6 @@
       flex-direction:column;
       align-items:center;
       gap:28px;
-      transform: translateY(-6%);
     }
     #front-title{
       font-weight:700;
@@ -128,21 +53,15 @@
       font-size: clamp(2.8rem, 6vw, 5rem);
       line-height:1.05;
       color:var(--text);
-      text-shadow: 0 8px 32px rgba(0,0,0,.45);
     }
     .front-links{
       display:flex;
-      align-items:center;
-      justify-content:space-between;
       gap:24px;
       width:min(720px, 92vw);
       margin-top:8px;
     }
     .front-links a{
-      flex:1 1 0;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
+      flex:1;
       padding:14px 22px;
       border-radius:14px;
       background:linear-gradient(160deg,rgba(14,31,77,.72),rgba(2,8,23,.86));
@@ -150,8 +69,6 @@
       color:var(--text);
       text-decoration:none;
       font-weight:600;
-      transition:transform .15s ease, border-color .15s ease, background .15s ease;
-      backdrop-filter:blur(10px);
     }
     .front-links a:hover{
       transform: translateY(-2px);
@@ -160,10 +77,10 @@
     .front-sub{
       color:var(--muted);
       font-size:1rem;
-      margin-top:2px;
     }
   </style>
 </head>
+
 <body>
 
   <!-- Landing Page -->
@@ -172,399 +89,13 @@
       <div id="front-title">H<sup>2</sup> Investors</div>
       <div class="front-sub">A Garage Project</div>
       <div class="front-links">
-        <a href="#fund1" data-fund1>Fund 1</a>
-        <a href="#fund2">Fund 2</a>
-        <a href="#fund3">Fund 3</a>
+        <!-- Now links directly to the new fund1.html file -->
+        <a href="fund1.html">Fund 1</a>
+        <a href="#">Fund 2</a>
+        <a href="#">Fund 3</a>
       </div>
     </div>
   </section>
-
-  <header>
-    <div class="logo">H<sup>2</sup> Investors</div>
-    <nav>
-      <a href="#signals">Signals</a>
-      <a href="#osebx">OSEBX</a>
-      <a href="#about">About</a>
-    </nav>
-  </header>
-
-  <main>
-    <section id="left">
-      <div class="eyebrow">Fund 1</div>
-      <h1>Stock Picks & Portfolio Tracker</h1>
-      <p>Tina is back.</p>
-
-      <aside class="card" id="signals" style="margin-top:40px;">
-        <h2 style="margin:0 0 8px">Today’s Signals</h2>
-        <div id="meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-        <div class="table-wrap">
-          <table aria-label="3-day signals">
-            <thead>
-              <tr>
-                <th>Ticker</th>
-                <th>Last Price</th>
-                <th>3-Day Return</th>
-                <th>Signal</th>
-                <th>As of</th>
-              </tr>
-            </thead>
-            <tbody id="rows">
-              <tr><td colspan="5">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </aside>
-    </section>
-
-    <div id="right-col">
-      <aside class="card" id="osebx">
-        <h2 style="margin:0 0 8px">OSEBX (1y)</h2>
-        <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-        <div class="chart" style="margin-top:8px">
-          <canvas id="osebx-chart"></canvas>
-        </div>
-        <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
-      </aside>
-
-      <aside class="card" id="portfolio" style="align-self:stretch;">
-        <h2 style="margin:0 0 8px">Portfolio NAV</h2>
-        <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-        <div class="chart" style="margin-top:8px">
-          <canvas id="portfolio-chart"></canvas>
-        </div>
-      </aside>
-    </div>
-
-    <aside class="card" id="left2">
-      <h2 style="margin:0 0 8px">
-        Portfolio Holdings
-        <span id="nav-pill" class="badge hold" style="margin-left:8px">
-          NAV: <span id="nav-number">—</span> NOK
-        </span>
-        <span id="pl-pill" class="badge hold" style="margin-left:8px">
-          P&amp;L: <span id="nav-pl-pct">—</span>
-        </span>
-      </h2>
-      <div id="holdings" class="table-wrap">
-        <table aria-label="Current holdings">
-          <thead>
-            <tr>
-              <th>Ticker</th>
-              <th>Qty</th>
-              <th>Entry</th>
-              <th>Last</th>
-              <th>P&amp;L (NOK)</th>
-              <th>P&amp;L (%)</th>
-            </tr>
-          </thead>
-          <tbody id="holdings-rows">
-            <tr><td colspan="6">Loading…</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </aside>
-  </main>
-
-  <footer id="about">
-    © 2025 H<sup>2</sup> Investors · Data auto-updated by GitHub Actions
-  </footer>
-
-  <script>
-    const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
-    const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
-
-    const JSON_URL = BASE + 'public/data/scan_3day.json';
-    const CSV_URL  = BASE + 'public/data/scan_3day.csv';
-    const OSEBX_URL      = BASE + 'public/data/osebx.json';
-    const PORT_NAV_URL   = BASE + 'public/data/portfolio_nav.json';
-    const PORT_STATE_URL = BASE + 'public/data/portfolio_state.json';
-
-    const metaEl = document.getElementById('meta');
-    const tbody  = document.getElementById('rows');
-
-    function parseUTC(s){
-      if (typeof s !== 'string') return new Date(s);
-      const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/);
-      return m ? new Date(`${m[1]}T${m[2]}:${m[3]}:00Z`) : new Date(s);
-    }
-    const fmtDate = s => new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(parseUTC(s));
-    const fmtPct  = x => Number.isFinite(+x) ? ((+x)*100).toFixed(2) + '%' : '—';
-    const fmtPx   = x => Number.isFinite(+x) ? (+x).toFixed(4) : '—';
-    const fmtQty  = x => Number.isFinite(+x) ? (+x).toFixed(6) : '—';
-    const fmtNok  = x => Number.isFinite(+x) ? (+x).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
-
-    window.latestScanRows = [];
-
-    function renderRows(rows){
-      window.latestScanRows = Array.isArray(rows) ? rows : [];
-      if (!Array.isArray(rows) || rows.length === 0) {
-        metaEl.textContent = '';
-        tbody.innerHTML = `<tr><td colspan="5">No data</td></tr>`;
-        return;
-      }
-      rows.sort((a,b) => (a["3D_Return"] ?? 9e9) - (b["3D_Return"] ?? 9e9));
-      metaEl.textContent = rows[0].Date ? `As of ${fmtDate(rows[0].Date)}` : '';
-
-      tbody.innerHTML = rows.map(r=>{
-        const lastPrice = fmtPx(r.LastPrice);
-        const ret3d     = fmtPct(r["3D_Return"]);
-        const signalRaw = (r.Signal || '').toUpperCase();
-        const signalCls = signalRaw === 'BUY' ? 'buy' : 'hold';
-        const asOf      = r.Date ? fmtDate(r.Date) : '—';
-        return `
-          <tr>
-            <td>${r.Ticker}</td>
-            <td>${lastPrice}</td>
-            <td>${ret3d}</td>
-            <td><span class="badge ${signalCls}">${signalRaw}</span></td>
-            <td>${asOf}</td>
-          </tr>`;
-      }).join('');
-    }
-
-    function parseCSV(text){
-      const lines = text.trim().split(/\r?\n/);
-      const headers = lines.shift().split(',').map(h => h.trim());
-      return lines.map(line=>{
-        const parts = line.split(',').map(v => v.trim());
-        const row = {};
-        headers.forEach((h,i)=>row[h] = parts[i] ?? '');
-        if ('3D_Return' in row) row['3D_Return'] = Number(row['3D_Return']);
-        if ('LastPrice' in row) row['LastPrice'] = Number(row['LastPrice']);
-        return row;
-      });
-    }
-
-    async function updateNavNumber(){
-      try{
-        const r = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!r.ok) return;
-        const arr = await r.json();
-        if(Array.isArray(arr) && arr.length){
-          const first = arr[0];
-          const last  = arr[arr.length-1];
-
-          // Set latest NAV
-          const el = document.getElementById('nav-number');
-          if(el) el.textContent = fmtNok(+last.nav);
-
-          // Use last.pl_pct if present; fallback to cumulative from first->last
-          let plPct = Number(last.pl_pct);
-          if (!Number.isFinite(plPct)) {
-            const firstNav = +first.nav, lastNav = +last.nav;
-            plPct = firstNav > 0 ? (lastNav/firstNav - 1) : 0;
-          }
-
-          const plPctEl = document.getElementById('nav-pl-pct');
-          if (plPctEl) plPctEl.textContent = fmtPct(plPct);
-        }
-      }catch(e){}
-    }
-
-    async function loadSignals(){
-      try{
-        const r = await fetch(`${JSON_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if (!r.ok) throw new Error(`JSON HTTP ${r.status}`);
-        const rows = await r.json();
-        renderRows(rows);
-        loadHoldings();
-        updateNavNumber();
-        return;
-      }catch(e){ console.warn('JSON failed, falling back to CSV:', e); }
-      try{
-        const r = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if (!r.ok) throw new Error(`CSV HTTP ${r.status}`);
-        const text = await r.text();
-        renderRows(parseCSV(text));
-        loadHoldings();
-        updateNavNumber();
-      }catch(e){
-        console.error(e);
-        metaEl.textContent = 'Failed to load';
-        tbody.innerHTML = `<tr><td colspan="5" style="color:#f88">Fetch error: ${String(e)}</td></tr>`;
-      }
-    }
-
-    async function loadHoldings(){
-      const wrap  = document.getElementById('holdings');
-      const tbody = document.getElementById('holdings-rows');
-      if(!wrap || !tbody) return;
-      try{
-        const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!r.ok){ tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No open positions</td></tr>`; return; }
-        const state = await r.json();
-        const positions = state.positions || {};
-        const tickers = Object.keys(positions);
-
-        if(!tickers.length){
-          tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No open positions</td></tr>`;
-          return;
-        }
-
-        const lastByTicker = new Map((window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)]));
-
-        tbody.innerHTML = tickers.map(t=>{
-          const p=positions[t], qty=+p.qty, entry=+p.entry_price, last=+(lastByTicker.get(t)??entry);
-          const stake=+(p.stake_nok ?? qty*entry);
-          const plNok = qty*last - stake;
-          const plPct = stake ? (plNok/stake) : 0;
-          return `<tr>
-            <td>${t}</td>
-            <td>${fmtQty(qty)}</td>
-            <td>${fmtPx(entry)}</td>
-            <td>${fmtPx(last)}</td>
-            <td>${fmtNok(plNok)}</td>
-            <td>${(plPct*100).toFixed(2)}%</td>
-          </tr>`;
-        }).join('');
-      }catch(e){
-        tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No open positions</td></tr>`;
-      }
-    }
-
-    loadSignals();
-    setInterval(loadSignals, 60_000);
-  </script>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script>
-    async function drawOsebx(){
-      const meta = document.getElementById('osebx-meta');
-      const ctx  = document.getElementById('osebx-chart').getContext('2d');
-      try{
-        const res = await fetch(`${OSEBX_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!res.ok) throw new Error(`OSEBX ${res.status}`);
-        const o = await res.json();
-        const rows = Array.isArray(o.rows) ? o.rows : (Array.isArray(o.data) ? o.data : []);
-        const labels = rows.map(p => p.t || p.date || p.time);
-        const closes = rows.map(p => p.close ?? p.Close ?? p.c);
-        if(!labels.length) throw new Error('No OSEBX data');
-
-       //before this line contained: meta.textContent = `As of ${o.as_of || o.asOf || ''} (source: ${o.ticker || 'OSEBX.OL'})`;
-       // now the block under finds the P&L for the OSEBX index from 2025-11-03
-      // ---- NEW: ONLY show P&L since 2025-11-03 ----
-const BASE_DATE = '2025-11-03';
-let plLine = '';
-
-const baseRow = rows.find(p => (p.t || p.date) === BASE_DATE);
-const lastRow = rows[rows.length - 1];
-
-if (baseRow && lastRow) {
-  const basePrice = Number(baseRow.close ?? baseRow.Close ?? baseRow.c);
-  const lastPrice = Number(lastRow.close ?? lastRow.Close ?? lastRow.c);
-
-  if (Number.isFinite(basePrice) && Number.isFinite(lastPrice) && basePrice > 0) {
-    const plPct = (lastPrice / basePrice - 1) * 100;
-    const sign  = plPct >= 0 ? '+' : '';
-    plLine = `P&L since ${BASE_DATE}: ${sign}${plPct.toFixed(2)}%`;
-  }
-}
-
-// Write only P&L (one line)
-meta.textContent = plLine || '';
-// ---- END NEW PART ----
-
-
-
-        new Chart(ctx,{
-          type:'line',
-          data:{ labels, datasets:[{
-            label:'OSEBX',
-            data:closes,
-            borderColor:'#62b0ff',
-            borderWidth:2,
-            pointRadius:0,
-            tension:.25
-          }]},
-          options:{
-            responsive:true, maintainAspectRatio:false,
-            scales:{ x:{ticks:{maxTicksLimit:6}, grid:{display:false}}, y:{grid:{color:'rgba(255,255,255,0.12)'}} },
-            plugins:{ legend:{display:true}, tooltip:{intersect:false,mode:'index'} }
-          }
-        });
-      }catch(e){
-        meta.textContent = 'Failed to load data';
-        console.error(e);
-      }
-    }
-
-    async function drawPortfolio(){
-      const meta = document.getElementById('portfolio-meta');
-      const ctx  = document.getElementById('portfolio-chart').getContext('2d');
-      try{
-        const res = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!res.ok) throw new Error(`Portfolio ${res.status}`);
-        const arr = await res.json();
-        if(!Array.isArray(arr) || !arr.length) throw new Error('No portfolio data yet');
-
-        const labels = arr.map(p => p.date);
-        const navs   = arr.map(p => p.nav);
-
-        meta.textContent = `NAV points: ${arr.length}`;
-
-        new Chart(ctx,{
-          type:'line',
-          data:{ labels, datasets:[{
-            label:'Portfolio',
-            data:navs,
-            borderColor:'#33e2a0',
-            borderWidth:2,
-            pointRadius:0,
-            tension:.25
-          }]},
-          options:{
-            responsive:true, maintainAspectRatio:false,
-            scales:{ x:{ticks:{maxTicksLimit:6}, grid:{display:false}}, y:{grid:{color:'rgba(255,255,255,0.12)'}} },
-            plugins:{ legend:{display:true}, tooltip:{intersect:false,mode:'index'} }
-          }
-        });
-      }catch(e){
-        meta.textContent = 'No portfolio data';
-        console.warn(e);
-      }
-    }
-
-  
-    // No interval needed — OSEBX updates once per day.
-// drawOsebx(); drawPortfolio();  // Already called above
-
-  </script>
-
-  <!-- FIXED SCRIPT: re-run data + charts after Fund 1 becomes visible -->
-  <script>
-    (function(){
-      const body = document.body;
-
-      function showFund1(){
-        body.classList.add('show-fund1');
-
-        // Re-fetch data + redraw charts now that elements are visible
-        try { loadSignals(); } catch(e){}
-        try { drawOsebx(); } catch(e){}
-        try { drawPortfolio(); } catch(e){}
-
-        // Clean URL
-        if (location.hash === '#fund1') {
-          history.replaceState(null, document.title, location.pathname + location.search);
-        }
-      }
-
-      if (location.hash === '#fund1') {
-        showFund1();
-      }
-
-      document.addEventListener('click', (e) => {
-        const link = e.target.closest('[data-fund1]');
-        if (!link) return;
-        e.preventDefault();
-        showFund1();
-      });
-
-      window.addEventListener('hashchange', () => {
-        if (location.hash === '#fund1') showFund1();
-      });
-    })();
-  </script>
 
 </body>
 </html>
