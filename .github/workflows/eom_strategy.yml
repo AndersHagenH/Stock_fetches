@@ -31,7 +31,7 @@ jobs:
         run: pip install yfinance pandas numpy requests pytz
 
       - name: Run EOM strategy
-        run: python Stock_fetches/eom_strategy.py
+        run: Stock_fetches/eom_strategy.py
 
       - name: Commit and push results
         run: |
