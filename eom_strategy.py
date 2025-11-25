@@ -1,109 +1,109 @@
 import pandas as pd
+import numpy as np
 import yfinance as yf
 import json
-from datetime import datetime, timezone
+from datetime import datetime
 
-# =============================================================
-# CONFIG
-# =============================================================
-TICKERS = ["DNO.OL", "CADLR.OL", "SOMA.OL", "AUTO.OL", "BWE.OL", "VAR.OL"]
-OUTPUT_PATH = "public/data/eom_signal.json"
-DAYS_FORWARD = 7  # exit 7 trading days after entry
+# ============================================================
+# 1. CONFIGURATION
+# ============================================================
 
+TOP6 = ["DNO.OL", "CADLR.OL", "SOMA.OL", "AUTO.OL", "BWE.OL", "VAR.OL"]
+OUTPUT_PATH = "public/data/eom_strategy.json"
 
-# =============================================================
-# HELPER: FIND 5TH LAST TRADING DAY OF CURRENT MONTH
-# =============================================================
-def get_fifth_last_trading_day(prices: pd.DataFrame) -> pd.Timestamp:
-    """Returns the 5th last trading day of the current month."""
-    today = pd.Timestamp.now().tz_localize("UTC").tz_convert("Europe/Oslo").normalize()
-
-    this_year = today.year
-    this_month = today.month
-
-    month_data = prices.loc[
-        (prices.index.year == this_year) &
-        (prices.index.month == this_month)
-    ]
-
-    if len(month_data) < 5:
-        return None
-
-    # 5th last trading day = index[-5]
-    return month_data.index[-5]
+START_DATE = "2010-01-01"  # for building trade calendar
 
 
-# =============================================================
-# MAIN SCRIPT
-# =============================================================
-def main():
-    # Fetch data for the last ~3 months (enough to detect month end + exit day)
-    data = yf.download(TICKERS, period="6mo", auto_adjust=True)["Close"]
+# ============================================================
+# 2. DOWNLOAD LATEST DATA
+# ============================================================
 
-    # Remove duplicates if Yahoo returns any
+def fetch_data():
+    data = yf.download(TOP6, start=START_DATE, auto_adjust=True)["Close"]
     data = data.loc[:, ~data.columns.duplicated()]
+    return data
 
-    # Get today's date in Oslo time
-    now = pd.Timestamp.now().tz_localize("UTC").tz_convert("Europe/Oslo")
-    today = now.normalize()
 
-    # Determine the 5th last trading day
-    fifth_last_td = get_fifth_last_trading_day(data)
+# ============================================================
+# 3. FIND 5TH LAST TRADING DAY OF EACH MONTH
+# ============================================================
 
-    if fifth_last_td is None:
-        print("Not enough data to compute 5th last trading day.")
-        return
+def compute_signal_dates(data):
+    signal_dates = []
 
-    # ---------------------------------------------------------
-    # CHECK IF TODAY IS THE SIGNAL DAY
-    # ---------------------------------------------------------
-    if today != fifth_last_td:
-        print("Not the 5th last trading day. No signal generated.")
-        return
+    for (year, month), group in data.groupby([data.index.year, data.index.month]):
+        if len(group) >= 5:
+            signal_dates.append(group.index[-5])  # 5th last day
 
-    print("Today IS the 5th last trading day. Generating signal...")
+    return pd.DatetimeIndex(signal_dates)
 
-    # Entry prices today
-    if today not in data.index:
-        print("Today's close price not available yet.")
-        return
 
-    entry_prices = data.loc[today]
+# ============================================================
+# 4. CHECK IF TODAY IS A SIGNAL DAY
+# ============================================================
 
-    # Compute exit date = 7 trading days after entry
-    today_idx = data.index.get_loc(today)
-    exit_idx = today_idx + DAYS_FORWARD
+def today_is_signal_day(signal_dates):
+    today = pd.Timestamp.today().normalize()
+
+    # running on GitHub, time may be UTC — normalize
+    return today in signal_dates
+
+
+# ============================================================
+# 5. GET ENTRY PRICE AND CALCULATE EXIT DATE
+# ============================================================
+
+def build_trade_signal(data, signal_dates):
+    today = pd.Timestamp.today().normalize()
+
+    entry_idx = data.index.get_loc(today)
+    exit_idx = entry_idx + 7  # 7 trading days later
 
     if exit_idx >= len(data):
-        print("Not enough future data to compute exit.")
-        exit_date = None
-        exit_prices = None
-    else:
-        exit_date = data.index[exit_idx]
-        exit_prices = data.loc[exit_date].to_dict()
+        return None  # out of bounds
 
-    # ---------------------------------------------------------
-    # BUILD JSON OUTPUT
-    # ---------------------------------------------------------
-    output = {
-        "generated_at": now.strftime("%Y-%m-%d %H:%M:%S"),
-        "signal_date": today.strftime("%Y-%m-%d"),
-        "tickers": TICKERS,
-        "entry_prices": entry_prices.to_dict(),
-        "exit_date_estimate": exit_date.strftime("%Y-%m-%d") if exit_date else None,
-        "exit_prices_estimate": exit_prices,
+    entry_prices = data.loc[today].to_dict()
+    exit_date = data.index[exit_idx]
+
+    return {
+        "date_generated": today.strftime("%Y-%m-%d"),
+        "entry_date": today.strftime("%Y-%m-%d"),
+        "exit_date": exit_date.strftime("%Y-%m-%d"),
+        "tickers": TOP6,
+        "entry_prices": entry_prices,
     }
 
-    # Save to file
-    with open(OUTPUT_PATH, "w") as f:
-        json.dump(output, f, indent=4)
 
-    print(f"Signal saved to {OUTPUT_PATH}")
+# ============================================================
+# 6. SAVE JSON
+# ============================================================
+
+def save_json(obj, filename):
+    with open(filename, "w") as f:
+        json.dump(obj, f, indent=4)
 
 
-# =============================================================
-# RUN
-# =============================================================
+# ============================================================
+# 7. MAIN EXECUTION LOGIC
+# ============================================================
+
+def main():
+    data = fetch_data()
+    signal_dates = compute_signal_dates(data)
+
+    if not today_is_signal_day(signal_dates):
+        print("Not a signal day. Exiting silently.")
+        return
+
+    signal = build_trade_signal(data, signal_dates)
+
+    if signal is None:
+        print("Could not generate signal (out of data range).")
+        return
+
+    save_json(signal, OUTPUT_PATH)
+    print(f"Signal generated and saved to {OUTPUT_PATH}")
+
+
 if __name__ == "__main__":
     main()
-
