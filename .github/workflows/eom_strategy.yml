@@ -1,1 +1,44 @@
+name: EOM Strategy Scan
+
+on:
+  schedule:
+    - cron: "0 * * * 1-5"   # run every hour on weekdays
+  workflow_dispatch:
+
+jobs:
+  run-eom-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Time filter: Only run between 08–18 Oslo time ---
+      - name: Skip if outside 08–18 Europe/Oslo
+        run: |
+          hour=$(TZ=Europe/Oslo date +%H)
+          if [ "$hour" -lt 8 ] || [ "$hour" -gt 18 ]; then
+            echo "Outside 08–18 Europe/Oslo; skipping."
+            exit 0
+          fi
+          echo "Within allowed hours ($hour), continuing."
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install yfinance pandas numpy
+
+      - name: Run EOM strategy
+        run: python python/eom_strategy.py
+
+      - name: Commit results
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add public/data/eom_top6.json || true
+          git commit -m "update eom strategy" || echo "no changes"
+          git push
 
