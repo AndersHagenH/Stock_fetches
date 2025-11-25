@@ -1,12 +1,12 @@
-name: EOM Strategy Scan
+name: run-eom-scan
 
 on:
   schedule:
-    - cron: "0 * * * 1-5"   # run every hour on weekdays
+    - cron: "0 * * * 1-5"   # every hour, Monday–Friday (UTC)
   workflow_dispatch:
 
 jobs:
-  run-eom-scan:
+  run-scan:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -14,7 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # --- Time filter: Only run between 08–18 Oslo time ---
       - name: Skip if outside 08–18 Europe/Oslo
         run: |
           hour=$(TZ=Europe/Oslo date +%H)
@@ -29,16 +28,15 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install yfinance pandas numpy
+        run: pip install yfinance pandas numpy requests pytz
 
       - name: Run EOM strategy
-        run: python python/eom_strategy.py
+        run: python Stock_fetches/eom_strategy.py
 
-      - name: Commit results
+      - name: Commit and push results
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add public/data/eom_top6.json || true
-          git commit -m "update eom strategy" || echo "no changes"
+          git add public/data/eom_signal.json || true
+          git commit -m "update eom signal" || echo "no changes"
           git push
-
