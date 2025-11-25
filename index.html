@@ -4,47 +4,33 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>H<sup>2</sup> Investors</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root{
       color-scheme: light;
       --bg-gradient: radial-gradient(circle at top, #0e1f4d 0%, #020817 50%, #010513 100%);
       --card-bg: rgba(255,255,255,0.08);
       --card-border: rgba(255,255,255,0.12);
-      --accent:#33e2a0;
-      --blue:#62b0ff;
+      --accent:#33e2a0;   /* portfolio green */
+      --blue:#62b0ff;     /* OSEBX blue */
       --text:#f8fbff;
       --muted:rgba(248,251,255,0.68);
     }
     *{box-sizing:border-box}
-
     body{
       margin:0;min-height:100vh;display:flex;flex-direction:column;
       font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       background:var(--bg-gradient);color:var(--text)
     }
-
     header{padding:24px clamp(16px, 8vw, 96px);display:flex;align-items:center;justify-content:space-between}
     .logo{font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.95rem}
     nav{display:flex;gap:24px;font-size:.95rem}
     nav a{color:var(--muted);text-decoration:none}
     nav a:hover{color:var(--text)}
 
-    /* Updated visibility logic */
-    body:not(.show-fund1):not(.show-fund2) header,
-    body:not(.show-fund1):not(.show-fund2) main,
-    body:not(.show-fund1):not(.show-fund2) footer {
-      display:none;
-    }
-
-    #front-page { display:none; }
-    body:not(.show-fund1):not(.show-fund2) #front-page { display:flex; }
-
-    /* FUND 1 layout (unchanged) */
+    /* GRID: row 1 is Signals + Right charts; row 2 is Holdings */
     main{
       flex:1;
       display:grid;
@@ -57,6 +43,8 @@
     }
     #left{ grid-area:left; }
     #left2{ grid-area:left2; }
+
+    /* RIGHT wrapper */
     #right-col{
       grid-area:right;
       display:flex;
@@ -65,6 +53,22 @@
       min-height:0;
       margin-top:266px;
     }
+    #right-col .card{
+      flex:1 1 0;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    @media (max-width:1024px){
+      main{
+        grid-template-columns:1fr;
+        grid-template-areas:
+          "left"
+          "right"
+          "left2";
+      }
+    }
+    @media (max-width:640px){ main{ padding-bottom: 64px; } }
 
     .eyebrow{display:inline-flex;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(51,226,160,.12);border:1px solid rgba(51,226,160,.32);color:var(--accent);font-size:.78rem;letter-spacing:.14em;margin-bottom:18px;text-transform:uppercase}
     h1{font-size:clamp(2.2rem,4vw,3.8rem);line-height:1.1;margin:0 0 18px}
@@ -87,8 +91,17 @@
 
     #holdings { margin-top: 12px; }
     #holdings table th, #holdings table td { font-size:.9rem; }
+  </style>
 
-    /* ---------- FRONT PAGE ---------- */
+  <!-- Front page styles -->
+  <style>
+    body:not(.show-fund1) header,
+    body:not(.show-fund1) main,
+    body:not(.show-fund1) footer { display: none; }
+
+    #front-page { display: none; }
+    body:not(.show-fund1) #front-page { display: flex; }
+
     #front-page{
       min-height:100vh;
       width:100%;
@@ -97,6 +110,7 @@
       text-align:center;
       padding:48px 24px;
       position:relative;
+      isolation:isolate;
     }
     #front-inner{
       width:min(960px, 92vw);
@@ -136,44 +150,30 @@
       color:var(--text);
       text-decoration:none;
       font-weight:600;
-      transition:transform .15s ease;
+      transition:transform .15s ease, border-color .15s ease, background .15s ease;
       backdrop-filter:blur(10px);
     }
     .front-links a:hover{
       transform: translateY(-2px);
       border-color: rgba(255,255,255,.26);
     }
-    .front-sub{ color:var(--muted);font-size:1rem;margin-top:2px; }
-
-    /* ---------- FUND 2 PAGE ---------- */
-    #fund2-page{
-  display:none;
-  padding:0 8vw;
-  margin-top:80px;   /* Moves content higher */
-  min-height:100vh;
-}
-
-#fund2-inner{
-  max-width:720px;   /* Aligns Fund 2 with Fund 1 */
-}
-
-
-    body.show-fund2 #fund2-page { display:block; }
-    body.show-fund2 main { display:none; }
-    body.show-fund2 #front-page { display:none; }
-
+    .front-sub{
+      color:var(--muted);
+      font-size:1rem;
+      margin-top:2px;
+    }
   </style>
 </head>
 <body>
 
   <!-- Landing Page -->
-  <section id="front-page">
+  <section id="front-page" aria-label="Landing">
     <div id="front-inner">
       <div id="front-title">H<sup>2</sup> Investors</div>
       <div class="front-sub">A Garage Project</div>
       <div class="front-links">
         <a href="#fund1" data-fund1>Fund 1</a>
-        <a href="#fund2" data-fund2>Fund 2</a>
+        <a href="#fund2">Fund 2</a>
         <a href="#fund3">Fund 3</a>
       </div>
     </div>
@@ -188,7 +188,6 @@
     </nav>
   </header>
 
-  <!-- FUND 1 PAGE (unchanged) -->
   <main>
     <section id="left">
       <div class="eyebrow">Fund 1</div>
@@ -227,7 +226,7 @@
         <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
       </aside>
 
-      <aside class="card" id="portfolio">
+      <aside class="card" id="portfolio" style="align-self:stretch;">
         <h2 style="margin:0 0 8px">Portfolio NAV</h2>
         <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
         <div class="chart" style="margin-top:8px">
@@ -266,22 +265,10 @@
     </aside>
   </main>
 
-  <!-- FUND 2 PAGE (same layout as Fund 1) -->
-<main id="fund2-main">
-  <section id="fund2-left">
-    <div class="eyebrow">Fund 2</div>
-    <h1>Coming Soon</h1>
-    <p>This page uses the same styling and header placement as Fund 1.</p>
-  </section>
-</main>
-
-
-
   <footer id="about">
     © 2025 H<sup>2</sup> Investors · Data auto-updated by GitHub Actions
   </footer>
 
-  <!-- SCRIPTS -->
   <script>
     const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
     const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
@@ -357,9 +344,11 @@
           const first = arr[0];
           const last  = arr[arr.length-1];
 
+          // Set latest NAV
           const el = document.getElementById('nav-number');
           if(el) el.textContent = fmtNok(+last.nav);
 
+          // Use last.pl_pct if present; fallback to cumulative from first->last
           let plPct = Number(last.pl_pct);
           if (!Number.isFinite(plPct)) {
             const firstNav = +first.nav, lastNav = +last.nav;
@@ -382,7 +371,6 @@
         updateNavNumber();
         return;
       }catch(e){ console.warn('JSON failed, falling back to CSV:', e); }
-
       try{
         const r = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache:'no-store' });
         if (!r.ok) throw new Error(`CSV HTTP ${r.status}`);
@@ -391,6 +379,7 @@
         loadHoldings();
         updateNavNumber();
       }catch(e){
+        console.error(e);
         metaEl.textContent = 'Failed to load';
         tbody.innerHTML = `<tr><td colspan="5" style="color:#f88">Fetch error: ${String(e)}</td></tr>`;
       }
@@ -438,7 +427,6 @@
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
   <script>
     async function drawOsebx(){
       const meta = document.getElementById('osebx-meta');
@@ -452,22 +440,31 @@
         const closes = rows.map(p => p.close ?? p.Close ?? p.c);
         if(!labels.length) throw new Error('No OSEBX data');
 
-        const BASE_DATE = '2025-11-03';
-        let plLine = '';
-        const baseRow = rows.find(p => (p.t || p.date) === BASE_DATE);
-        const lastRow = rows[rows.length - 1];
+       //before this line contained: meta.textContent = `As of ${o.as_of || o.asOf || ''} (source: ${o.ticker || 'OSEBX.OL'})`;
+       // now the block under finds the P&L for the OSEBX index from 2025-11-03
+      // ---- NEW: ONLY show P&L since 2025-11-03 ----
+const BASE_DATE = '2025-11-03';
+let plLine = '';
 
-        if (baseRow && lastRow) {
-          const basePrice = Number(baseRow.close ?? baseRow.Close ?? baseRow.c);
-          const lastPrice = Number(lastRow.close ?? lastRow.Close ?? lastRow.c);
-          if (Number.isFinite(basePrice) && Number.isFinite(lastPrice) && basePrice > 0) {
-            const plPct = (lastPrice / basePrice - 1) * 100;
-            const sign  = plPct >= 0 ? '+' : '';
-            plLine = `P&L since ${BASE_DATE}: ${sign}${plPct.toFixed(2)}%`;
-          }
-        }
+const baseRow = rows.find(p => (p.t || p.date) === BASE_DATE);
+const lastRow = rows[rows.length - 1];
 
-        meta.textContent = plLine || '';
+if (baseRow && lastRow) {
+  const basePrice = Number(baseRow.close ?? baseRow.Close ?? baseRow.c);
+  const lastPrice = Number(lastRow.close ?? lastRow.Close ?? lastRow.c);
+
+  if (Number.isFinite(basePrice) && Number.isFinite(lastPrice) && basePrice > 0) {
+    const plPct = (lastPrice / basePrice - 1) * 100;
+    const sign  = plPct >= 0 ? '+' : '';
+    plLine = `P&L since ${BASE_DATE}: ${sign}${plPct.toFixed(2)}%`;
+  }
+}
+
+// Write only P&L (one line)
+meta.textContent = plLine || '';
+// ---- END NEW PART ----
+
+
 
         new Chart(ctx,{
           type:'line',
@@ -487,6 +484,7 @@
         });
       }catch(e){
         meta.textContent = 'Failed to load data';
+        console.error(e);
       }
     }
 
@@ -522,23 +520,30 @@
         });
       }catch(e){
         meta.textContent = 'No portfolio data';
+        console.warn(e);
       }
     }
+
+  
+    // No interval needed — OSEBX updates once per day.
+// drawOsebx(); drawPortfolio();  // Already called above
+
   </script>
 
-  <!-- FUND 1 PAGE ACTIVATION -->
+  <!-- FIXED SCRIPT: re-run data + charts after Fund 1 becomes visible -->
   <script>
     (function(){
       const body = document.body;
 
       function showFund1(){
         body.classList.add('show-fund1');
-        body.classList.remove('show-fund2');
 
+        // Re-fetch data + redraw charts now that elements are visible
         try { loadSignals(); } catch(e){}
         try { drawOsebx(); } catch(e){}
         try { drawPortfolio(); } catch(e){}
 
+        // Clean URL
         if (location.hash === '#fund1') {
           history.replaceState(null, document.title, location.pathname + location.search);
         }
@@ -558,39 +563,6 @@
       window.addEventListener('hashchange', () => {
         if (location.hash === '#fund1') showFund1();
       });
-
-    })();
-  </script>
-
-  <!-- FUND 2 PAGE ACTIVATION -->
-  <script>
-    (function(){
-      const body = document.body;
-
-      function showFund2(){
-        body.classList.add('show-fund2');
-        body.classList.remove('show-fund1');
-
-        if (location.hash === '#fund2') {
-          history.replaceState(null, document.title, location.pathname + location.search);
-        }
-      }
-
-      if (location.hash === '#fund2') {
-        showFund2();
-      }
-
-      document.addEventListener('click', (e) => {
-        const link = e.target.closest('[data-fund2]');
-        if (!link) return;
-        e.preventDefault();
-        showFund2();
-      });
-
-      window.addEventListener('hashchange', () => {
-        if (location.hash === '#fund2') showFund2();
-      });
-
     })();
   </script>
 
