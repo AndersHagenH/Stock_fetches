@@ -25,15 +25,15 @@ def fetch_data():
 
 
 # ============================================================
-# 3. FIND 5TH LAST TRADING DAY OF EACH MONTH
+# 3. FIND 3RD LAST TRADING DAY OF EACH MONTH
 # ============================================================
 
 def compute_signal_dates(data):
     signal_dates = []
 
     for (year, month), group in data.groupby([data.index.year, data.index.month]):
-        if len(group) >= 5:
-            signal_dates.append(group.index[-5])  # 5th last day
+        if len(group) >= 3:
+            signal_dates.append(group.index[-3])  # 3rd last day
 
     return pd.DatetimeIndex(signal_dates)
 
@@ -65,7 +65,7 @@ def build_trade_signal(data, signal_dates):
     entry_prices = data.loc[today].to_dict()
     exit_date = data.index[exit_idx]
 
-    return {
+    return:
         "date_generated": today.strftime("%Y-%m-%d"),
         "entry_date": today.strftime("%Y-%m-%d"),
         "exit_date": exit_date.strftime("%Y-%m-%d"),
