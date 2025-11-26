@@ -32,12 +32,35 @@
       color:var(--text)
     }
 
-    header{
-      padding:24px clamp(16px, 8vw, 96px);
-      display:flex;
-      align-items:center;
-      justify-content:space-between
-    }
+   header{
+  padding:24px clamp(16px, 8vw, 96px);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.logo{
+  font-weight:700;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  font-size:.95rem;
+}
+
+nav{
+  display:flex;
+  gap:24px;
+  font-size:.95rem;
+}
+
+nav a{
+  color:var(--muted);
+  text-decoration:none;
+}
+
+nav a:hover{
+  color:var(--text);
+}
+
 
     /* ---------------------------------------------------------
        NEW GRID:  left1 | right1
