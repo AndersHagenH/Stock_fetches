@@ -524,19 +524,22 @@ async function drawOsebx(){
     const labels = rows.map(p => p.t || p.date || p.time);
     const closes = rows.map(p => p.close ?? p.Close ?? p.c);
 
- // --- Calculate P&L ---
-const BASE_DATE = labels[0];
-
-
+// --- Calculate P&L from fixed baseline date ---
+const BASE_DATE = '2025-11-03';
 let plLine = '';
 
-const basePrice = closes[0];
-const lastPrice = closes[closes.length - 1];
+const baseRow = rows.find(p => (p.t || p.date) === BASE_DATE);
+const lastRow = rows[rows.length - 1];
 
-if (Number.isFinite(basePrice) && Number.isFinite(lastPrice) && basePrice > 0) {
-  const plPct = (lastPrice / basePrice - 1) * 100;
-  const sign = plPct >= 0 ? '+' : '';
-  plLine = `P&L since ${BASE_DATE}: ${sign}${plPct.toFixed(2)}%`;
+if (baseRow && lastRow) {
+  const basePrice = Number(baseRow.close ?? baseRow.Close ?? baseRow.c);
+  const lastPrice = Number(lastRow.close ?? lastRow.Close ?? lastRow.c);
+
+  if (Number.isFinite(basePrice) && Number.isFinite(lastPrice) && basePrice > 0) {
+    const plPct = (lastPrice / basePrice - 1) * 100;
+    const sign  = plPct >= 0 ? '+' : '';
+    plLine = `P&L since ${BASE_DATE}: ${sign}${plPct.toFixed(2)}%`;
+  }
 }
 
 meta.textContent = plLine || '';
