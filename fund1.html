@@ -55,14 +55,23 @@
     }
 
     #left1{ grid-area:left1; }
-    #right1{
-      grid-area:right1;
-      display:flex;
-      flex-direction:column;
-      gap:48px;
-      min-height:0;
-      margin-top:40px;
-    }
+   #right1{
+  grid-area:right1;
+  display:flex;
+  flex-direction:column;
+  gap:48px;
+  min-height:0;
+  margin-top:40px;
+}
+
+/* NEW — equal height for the two charts */
+#right1 .card{
+  flex:1 1 0;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+
 
     #left2{ grid-area:left2; }
     #right2{
