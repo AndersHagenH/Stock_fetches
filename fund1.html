@@ -353,16 +353,33 @@ async function updateNavNumber(){
   try{
     const r = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
     if(!r.ok) return;
+
     const arr = await r.json();
-    if(Array.isArray(arr) && arr.length){
-      const first = arr[0], last = arr[arr.length-1];
-      const navEl = document.getElementById('nav-number');
-      if(navEl) navEl.textContent = fmtNok(+last.nav);
-      const plEl = document.getElementById('nav-pl-pct');
-      if(plEl) plEl.textContent = fmtPct(+last.pl_pct);
-    }
+    if(!Array.isArray(arr) || !arr.length) return;
+
+    const first = arr[0];
+    const last = arr[arr.length - 1];
+
+    const navValue = fmtNok(+last.nav);
+    const plPctValue = fmtPct(+last.pl_pct);
+
+    // Update Portfolio NAV card (top right)
+    const navEl = document.getElementById('nav-number');
+    if(navEl) navEl.textContent = navValue;
+
+    const plEl = document.getElementById('nav-pl-pct');
+    if(plEl) plEl.textContent = plPctValue;
+
+    // Update Holdings header (bottom left)
+    const hNavEl = document.getElementById('holdings-nav-number');
+    if(hNavEl) hNavEl.textContent = navValue;
+
+    const hPlEl = document.getElementById('holdings-nav-pl');
+    if(hPlEl) hPlEl.textContent = plPctValue;
+
   }catch(e){}
 }
+
 
 async function loadSignals() {
 
