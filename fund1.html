@@ -96,11 +96,18 @@
       backdrop-filter:blur(10px)
     }
 
-    .chart{
-  flex:none;        /* prevents shrinking */
-  height:450px;     /* makes charts much larger */
-  width:100%;
+  .chart {
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
 }
+
+.chart canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
 
 
     /* FIX 2 — unify x-axis spacing */
