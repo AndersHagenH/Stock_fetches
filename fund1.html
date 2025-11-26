@@ -411,25 +411,26 @@ async function loadHoldings(){
   }
 }
 
-async function loadTradeLog(){
+async function loadTradeLog() {
   const url = BASE + 'public/data/trade_log.csv?t=' + Date.now();
   const tbody = document.getElementById('tradelog-rows');
   const meta  = document.getElementById('tradelog-meta');
 
-  try{
-    const r = await fetch(url, {cache:'no-store'});
-    if(!r.ok) throw new Error('trade_log.csv not found');
+  try {
+    const r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok) throw new Error('trade_log.csv not found');
 
     const text = await r.text();
-    const lines = text.trim().split(/\r?\n/);
-    const headers = lines.shift().split(',');
 
-    const rows = lines.map(line=>{
-      const cols = line.split(',');
-      return Object.fromEntries(headers.map((h,i)=>[h, cols[i]]));
+    const lines = text.trim().split(/\r?\n/);
+    const headers = lines.shift().split(',').map(h => h.trim());
+
+    const rows = lines.map(line => {
+      const cols = line.split(',').map(v => v.trim());
+      return Object.fromEntries(headers.map((h,i)=>[h, cols[i] ?? '']));
     });
 
-    if(rows.length === 0){
+    if (rows.length === 0) {
       tbody.innerHTML = `<tr><td colspan="6">No trades</td></tr>`;
       meta.textContent = '';
       return;
@@ -437,22 +438,26 @@ async function loadTradeLog(){
 
     meta.textContent = `Trades: ${rows.length}`;
 
-    tbody.innerHTML = rows.map(r=>`
+    tbody.innerHTML = rows.map(r => `
       <tr>
-        <td>${r.Date}</td>
         <td>${r.Ticker}</td>
-        <td>${r.Side}</td>
-        <td>${(+r.Qty).toFixed(6)}</td>
-        <td>${(+r.Price).toFixed(4)}</td>
-        <td>${(+r.Total_NOK).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+        <td>${r.EntryDate}</td>
+        <td>${Number(r.EntryPrice).toFixed(4)}</td>
+        <td>${r.ExitDate}</td>
+        <td>${Number(r.ExitPrice).toFixed(4)}</td>
+        <td>${Number(r.PL_NOK).toLocaleString('en-GB', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}</td>
       </tr>
     `).join('');
 
-  }catch(e){
+  } catch (e) {
     tbody.innerHTML = `<tr><td colspan="6">Could not load trade log</td></tr>`;
     meta.textContent = '';
   }
 }
+
 
 loadSignals();
 setInterval(loadSignals, 60_000);
