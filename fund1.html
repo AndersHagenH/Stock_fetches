@@ -50,21 +50,24 @@
     #left2{ grid-area:left2; }
 
     /* FIX 1 — Match the Signals card vertical offset */
-    #right-col{
-      grid-area:right;
-      display:flex;
-      flex-direction:column;
-      gap:48px;
-      min-height:0;
-      margin-top:40px;
-    }
-
-  #right-col .card {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
+ #right-col{
+  grid-area:right;
+  display:flex;
+  flex-direction:column;
+  gap:48px;
+  min-height:0;
+  margin-top:40px;
+  height:100%;     /* <-- add this */
 }
+
+
+  #right-col .card{
+  flex:1 1 0;     /* equal height for both charts */
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+
 
 
     @media (max-width:1024px){
