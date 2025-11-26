@@ -28,7 +28,13 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps
-        run: pip install yfinance pandas numpy requests pytz
+        run: |
+          pip install yfinance
+          pip install pandas
+          pip install numpy
+          pip install requests
+          pip install pytz
+          pip install pandas-market-calendars   # <-- REQUIRED FIX
 
       - name: Run EOM strategy
         run: python eom_strategy.py
