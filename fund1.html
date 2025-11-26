@@ -49,14 +49,14 @@
     #left{ grid-area:left; }
     #left2{ grid-area:left2; }
 
-    /* UPDATED: removed margin-top misalignment */
+    /* FIX 1 — Match the Signals card vertical offset */
     #right-col{
       grid-area:right;
       display:flex;
       flex-direction:column;
       gap:48px;
       min-height:0;
-      margin-top:0; /* FIX */
+      margin-top:40px;
     }
 
     #right-col .card{
@@ -74,7 +74,9 @@
           "right"
           "left2";
       }
-      #right-col{ margin-top:0; }
+      #right-col{
+        margin-top:0;
+      }
     }
 
     .eyebrow{
@@ -86,13 +88,24 @@
     h1{font-size:clamp(2.2rem,4vw,3.8rem);line-height:1.1;margin:0 0 18px}
     p{color:var(--muted);font-size:1.05rem;max-width:560px}
 
-    /* UPDATED: increased padding */
     .card{
-      padding:32px; /* was 24px */
+      padding:24px;
       border-radius:20px;
       border:1px solid var(--card-border);
       background:linear-gradient(160deg,rgba(14,31,77,.72),rgba(2,8,23,.86));
       backdrop-filter:blur(10px)
+    }
+
+    .chart{
+      flex:1 1 0;
+      min-height:300px;
+      width:100%;
+    }
+
+    /* FIX 2 — unify x-axis spacing */
+    .chart canvas{
+      display:block;
+      margin:0 auto;
     }
 
     .table-wrap{width:100%;overflow-x:auto;margin-top:10px}
@@ -107,13 +120,6 @@
       padding:36px clamp(16px, 8vw, 96px) 40px;
       color:var(--muted);font-size:.88rem;text-align:center;
       border-top:1px solid rgba(255,255,255,0.06)
-    }
-
-    /* UPDATED: taller charts */
-    .chart{
-      flex:1 1 0;
-      min-height:350px; /* FIX */
-      width:100%;
     }
 
     #holdings { margin-top: 12px; }
@@ -224,7 +230,7 @@
     © 2025 H<sup>2</sup> Investors · Data auto-updated by GitHub Actions
   </footer>
 
-  <!-- JAVASCRIPT (unchanged) -->
+  <!-- JAVASCRIPT (unchanged except layout padding in both charts) -->
 
   <script>
     const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
@@ -336,7 +342,9 @@
       }catch(e){
         console.error(e);
         metaEl.textContent = 'Failed to load';
-        tbody.innerHTML = `<tr><td colspan="5" style="color:#f88">Fetch error: ${String(e)}</td></tr>`;
+        tbody.innerHTML = `<tr>
+          <td colspan="5" style="color:#f88">Fetch error: ${String(e)}</td>
+        </tr>`;
       }
     }
 
@@ -346,7 +354,10 @@
       if(!wrap || !tbody) return;
       try{
         const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!r.ok){ tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No open positions</td></tr>`; return; }
+        if(!r.ok){
+          tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No open positions</td></tr>`;
+          return;
+        }
         const state = await r.json();
         const positions = state.positions || {};
         const tickers = Object.keys(positions);
@@ -356,21 +367,28 @@
           return;
         }
 
-        const lastByTicker = new Map((window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)]));
+        const lastByTicker = new Map(
+          (window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)])
+        );
 
         tbody.innerHTML = tickers.map(t=>{
-          const p=positions[t], qty=+p.qty, entry=+p.entry_price, last=+(lastByTicker.get(t)??entry);
-          const stake=+(p.stake_nok ?? qty*entry);
-          const plNok = qty*last - stake;
+          const p = positions[t];
+          const qty = +p.qty;
+          const entry = +p.entry_price;
+          const last = +(lastByTicker.get(t) ?? entry);
+          const stake = +(p.stake_nok ?? qty * entry);
+          const plNok = qty * last - stake;
           const plPct = stake ? (plNok/stake) : 0;
-          return `<tr>
-            <td>${t}</td>
-            <td>${fmtQty(qty)}</td>
-            <td>${fmtPx(entry)}</td>
-            <td>${fmtPx(last)}</td>
-            <td>${fmtNok(plNok)}</td>
-            <td>${(plPct*100).toFixed(2)}%</td>
-          </tr>`;
+
+          return `
+            <tr>
+              <td>${t}</td>
+              <td>${fmtQty(qty)}</td>
+              <td>${fmtPx(entry)}</td>
+              <td>${fmtPx(last)}</td>
+              <td>${fmtNok(plNok)}</td>
+              <td>${(plPct*100).toFixed(2)}%</td>
+            </tr>`;
         }).join('');
       }catch(e){
         tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No open positions</td></tr>`;
@@ -428,9 +446,20 @@
             tension:.25
           }]},
           options:{
-            responsive:true, maintainAspectRatio:false,
-            scales:{ x:{ticks:{maxTicksLimit:6}, grid:{display:false}}, y:{grid:{color:'rgba(255,255,255,0.12)'}} },
-            plugins:{ legend:{display:true}, tooltip:{intersect:false,mode:'index'} }
+            responsive:true,
+            maintainAspectRatio:false,
+
+            /* FIX 2 — unify x-axis spacing */
+            layout:{ padding:{ left:0, right:0, top:0, bottom:20 } },
+
+            scales:{
+              x:{ticks:{maxTicksLimit:6}, grid:{display:false}},
+              y:{grid:{color:'rgba(255,255,255,0.12)'}}
+            },
+            plugins:{
+              legend:{display:true},
+              tooltip:{intersect:false,mode:'index'}
+            }
           }
         });
       }catch(e){
@@ -466,9 +495,20 @@
             tension:.25
           }]},
           options:{
-            responsive:true, maintainAspectRatio:false,
-            scales:{ x:{ticks:{maxTicksLimit:6}, grid:{display:false}}, y:{grid:{color:'rgba(255,255,255,0.12)'}} },
-            plugins:{ legend:{display:true}, tooltip:{intersect:false,mode:'index'} }
+            responsive:true,
+            maintainAspectRatio:false,
+
+            /* FIX 2 — unify x-axis spacing */
+            layout:{ padding:{ left:0, right:0, top:0, bottom:20 } },
+
+            scales:{
+              x:{ticks:{maxTicksLimit:6}, grid:{display:false}},
+              y:{grid:{color:'rgba(255,255,255,0.12)'}}
+            },
+            plugins:{
+              legend:{display:true},
+              tooltip:{intersect:false,mode:'index'}
+            }
           }
         });
       }catch(e){
