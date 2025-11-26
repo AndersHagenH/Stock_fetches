@@ -97,10 +97,11 @@
     }
 
     .chart{
-      flex:1 1 0;
-      min-height:300px;
-      width:100%;
-    }
+  flex:none;        /* prevents shrinking */
+  height:450px;     /* makes charts much larger */
+  width:100%;
+}
+
 
     /* FIX 2 — unify x-axis spacing */
     .chart canvas{
