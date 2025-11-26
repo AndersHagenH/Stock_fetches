@@ -21,73 +21,56 @@
       --text:#f8fbff;
       --muted:rgba(248,251,255,0.68);
     }
-    *{box-sizing:border-box}
+
     body{
-      margin:0;min-height:100vh;display:flex;flex-direction:column;
-      font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-      background:var(--bg-gradient);color:var(--text)
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      font-family:'Poppins',sans-serif;
+      background:var(--bg-gradient);
+      color:var(--text)
     }
+
     header{
       padding:24px clamp(16px, 8vw, 96px);
-      display:flex;align-items:center;justify-content:space-between
+      display:flex;
+      align-items:center;
+      justify-content:space-between
     }
-    .logo{font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.95rem}
-    nav{display:flex;gap:24px;font-size:.95rem}
-    nav a{color:var(--muted);text-decoration:none}
-    nav a:hover{color:var(--text)}
 
+    /* ---------------------------------------------------------
+       NEW GRID:  left1 | right1
+                  left2 | right2
+       --------------------------------------------------------- */
     main{
       flex:1;
       display:grid;
-      grid-template-columns:minmax(320px,720px) 1fr;
+      grid-template-columns: minmax(320px,720px) 1fr;
       grid-template-areas:
-        "left  right"
-        "left2 .";
+        "left1 right1"
+        "left2 right2";
       gap:48px;
       padding:0 8vw 10vh;
     }
-    #left{ grid-area:left; }
+
+    #left1{ grid-area:left1; }
+    #right1{
+      grid-area:right1;
+      display:flex;
+      flex-direction:column;
+      gap:48px;
+      min-height:0;
+      margin-top:40px;
+    }
+
     #left2{ grid-area:left2; }
-
-    /* FIX 1 — Match the Signals card vertical offset */
- #right-col{
-  grid-area:right;
-  display:flex;
-  flex-direction:column;
-  gap:48px;
-  min-height:0;
-  margin-top:40px;
-}
-
-  #right-col .card{
-  flex:1 1 0;     /* equal height for charts */
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-}
-
-    @media (max-width:1024px){
-      main{
-        grid-template-columns:1fr;
-        grid-template-areas:
-          "left"
-          "right"
-          "left2";
-      }
-      #right-col{
-        margin-top:0;
-      }
+    #right2{
+      grid-area:right2;
+      margin-top:-40px; /* aligns trade log with holdings */
     }
 
-    .eyebrow{
-      display:inline-flex;gap:8px;padding:6px 14px;border-radius:999px;
-      background:rgba(51,226,160,.12);border:1px solid rgba(51,226,160,.32);
-      color:var(--accent);font-size:.78rem;letter-spacing:.14em;
-      margin-bottom:18px;text-transform:uppercase
-    }
-    h1{font-size:clamp(2.2rem,4vw,3.8rem);line-height:1.1;margin:0 0 18px}
-    p{color:var(--muted);font-size:1.05rem;max-width:560px}
-
+    /* CARDS --------------------------------------------------- */
     .card{
       padding:24px;
       border-radius:20px;
@@ -96,154 +79,147 @@
       backdrop-filter:blur(10px)
     }
 
-  .chart {
-  flex: 1 1 auto;
-  width: 100%;
-  min-height: 0;
-}
-
-.chart canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-
-    .chart canvas{
-      display:block;
-      margin:0 auto;
+    .chart{
+      flex:1 1 auto;
+      width:100%;
+      min-height:0;
     }
 
-    .table-wrap{width:100%;overflow-x:auto;margin-top:10px}
-    table{border-collapse:collapse;width:100%;font-size: clamp(.88rem, .9vw, .95rem)}
-    th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left}
-    th{background:rgba(255,255,255,.06)}
-    .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-weight:600;font-size:.82rem}
-    .buy{background:rgba(51,226,160,.24);border:1px solid rgba(51,226,160,.6);color:var(--text)}
-    .hold{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:var(--text)}
+    .chart canvas{
+      width:100% !important;
+      height:100% !important;
+      display:block;
+      margin:0;
+    }
+
+    .table-wrap{
+      width:100%;
+      overflow-x:auto;
+      margin-top:10px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:clamp(.88rem, .9vw, .95rem);
+    }
+
+    th,td{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+      text-align:left;
+    }
+
+    th{
+      background:rgba(255,255,255,.06);
+    }
+
+    .badge{
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:999px;
+      font-weight:600;
+      font-size:.82rem;
+    }
+
+    .buy{
+      background:rgba(51,226,160,.24);
+      border:1px solid rgba(51,226,160,.6);
+      color:var(--text)
+    }
+
+    .hold{
+      background:rgba(255,255,255,.1);
+      border:1px solid rgba(255,255,255,.25);
+      color:var(--text)
+    }
 
     footer{
       padding:36px clamp(16px, 8vw, 96px) 40px;
-      color:var(--muted);font-size:.88rem;text-align:center;
+      color:var(--muted);
+      font-size:.88rem;
+      text-align:center;
       border-top:1px solid rgba(255,255,255,0.06)
     }
-
-    #holdings { margin-top: 12px; }
-    #holdings table th, #holdings table td { font-size:.9rem; }
   </style>
 </head>
 
 <body>
 
-  <header>
-    <div class="logo">H<sup>2</sup> Investors</div>
-    <nav>
-      <a href="#signals">Signals</a>
-      <a href="#osebx">OSEBX</a>
-      <a href="#about">About</a>
-    </nav>
-  </header>
+<header>
+  <div class="logo">H<sup>2</sup> Investors</div>
+  <nav>
+    <a href="#signals">Signals</a>
+    <a href="#osebx">OSEBX</a>
+    <a href="#about">About</a>
+  </nav>
+</header>
 
 <section class="hero" style="padding:0 8vw 40px; margin-top:40px;">
-  <div class="eyebrow">Fund 1</div>
+  <div class="eyebrow" style="
+      display:inline-flex;gap:8px;padding:6px 14px;border-radius:999px;
+      background:rgba(51,226,160,.12);border:1px solid rgba(51,226,160,.32);
+      color:var(--accent);font-size:.78rem;letter-spacing:.14em;
+      margin-bottom:18px;text-transform:uppercase">
+    Fund 1
+  </div>
   <h1 style="white-space:nowrap;">Stock Picks & Portfolio Tracker</h1>
   <p style="max-width:560px;">Tina is back.</p>
 </section>
 
-  
-  <main>
+<main>
 
-    <!-- LEFT COLUMN -->
-    <section id="left">
-      <aside class="card" id="signals" style="margin-top:40px;">
-        <h2 style="margin:0 0 8px">Today’s Signals</h2>
-        <div id="meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-        <div class="table-wrap">
-          <table aria-label="3-day signals">
-            <thead>
-              <tr>
-                <th>Ticker</th>
-                <th>Last Price</th>
-                <th>3-Day Return</th>
-                <th>Signal</th>
-                <th>As of</th>
-              </tr>
-            </thead>
-            <tbody id="rows">
-              <tr><td colspan="5">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </aside>
-    </section>
-
-    <!-- RIGHT COLUMN -->
-    <div id="right-col">
-
-      <aside class="card" id="osebx">
-        <h2 style="margin:0 0 8px">OSEBX (1y)</h2>
-        <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-        <div class="chart" style="margin-top:8px">
-          <canvas id="osebx-chart"></canvas>
-        </div>
-        <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
-      </aside>
-
-      <aside class="card" id="portfolio" style="align-self:stretch;">
-        <h2 style="margin:0 0 8px">Portfolio NAV</h2>
-        <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-        <div class="chart" style="margin-top:8px">
-          <canvas id="portfolio-chart"></canvas>
-        </div>
-      </aside>
-
-      <!-- ✅ NEW TRADE LOG CARD -->
-      <aside class="card" id="tradelog">
-        <h2 style="margin:0 0 8px">Trade Log</h2>
-        <div id="tradelog-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-
-        <div class="table-wrap" style="margin-top:10px;">
-          <table aria-label="Trade Log">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Ticker</th>
-                <th>Side</th>
-                <th>Qty</th>
-                <th>Price</th>
-                <th>Total (NOK)</th>
-              </tr>
-            </thead>
-            <tbody id="tradelog-rows">
-              <tr><td colspan="6" style="opacity:.7">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </aside>
-
-    </div>
-
-    <!-- HOLDINGS COLUMN -->
-    <aside class="card" id="left2">
-      <h2 style="margin:0 0 8px">
-        Portfolio Holdings
-        <span id="nav-pill" class="badge hold" style="margin-left:8px">
-          NAV: <span id="nav-number">—</span> NOK
-        </span>
-        <span id="pl-pill" class="badge hold" style="margin-left:8px">
-          P&amp;L: <span id="nav-pl-pct">—</span>
-        </span>
-      </h2>
-
-      <div id="holdings" class="table-wrap">
-        <table aria-label="Current holdings">
+  <!-- LEFT1: SIGNALS -->
+  <section id="left1">
+    <aside class="card" id="signals" style="margin-top:40px;">
+      <h2>Today’s Signals</h2>
+      <div id="meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
+      <div class="table-wrap">
+        <table aria-label="3-day signals">
           <thead>
             <tr>
               <th>Ticker</th>
-              <th>Qty</th>
-              <th>Entry</th>
-              <th>Last</th>
-              <th>P&amp;L (NOK)</th>
-              <th>P&amp;L (%)</th>
+              <th>Last Price</th>
+              <th>3-Day Return</th>
+              <th>Signal</th>
+              <th>As of</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="5">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </aside>
+  </section>
+
+  <!-- RIGHT1: CHARTS -->
+  <section id="right1">
+
+    <aside class="card" id="osebx">
+      <h2>OSEBX (1y)</h2>
+      <div id="osebx-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
+      <div class="chart"><canvas id="osebx-chart"></canvas></div>
+      <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
+    </aside>
+
+    <aside class="card" id="portfolio">
+      <h2>Portfolio NAV</h2>
+      <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
+      <div class="chart"><canvas id="portfolio-chart"></canvas></div>
+    </aside>
+
+  </section>
+
+  <!-- LEFT2: PORTFOLIO HOLDINGS -->
+  <section id="left2">
+    <aside class="card">
+      <h2>Portfolio Holdings</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Ticker</th><th>Qty</th><th>Entry</th><th>Last</th><th>P&L (NOK)</th><th>P&L (%)</th>
             </tr>
           </thead>
           <tbody id="holdings-rows">
@@ -252,346 +228,319 @@
         </table>
       </div>
     </aside>
+  </section>
 
-  </main>
-
-  <footer id="about">
-    © 2025 H<sup>2</sup> Investors · Data auto-updated by GitHub Actions
-  </footer>
-
-  <script>
-    const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
-    const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
-
-    const JSON_URL = BASE + 'public/data/scan_3day.json';
-    const CSV_URL  = BASE + 'public/data/scan_3day.csv';
-    const OSEBX_URL      = BASE + 'public/data/osebx.json';
-    const PORT_NAV_URL   = BASE + 'public/data/portfolio_nav.json';
-    const PORT_STATE_URL = BASE + 'public/data/portfolio_state.json';
-
-    const metaEl = document.getElementById('meta');
-    const tbody  = document.getElementById('rows');
-
-    function parseUTC(s){
-      if (typeof s !== 'string') return new Date(s);
-      const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/);
-      return m ? new Date(`${m[1]}T${m[2]}:${m[3]}:00Z`) : new Date(s);
-    }
-    const fmtDate = s => new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(parseUTC(s));
-    const fmtPct  = x => Number.isFinite(+x) ? ((+x)*100).toFixed(2) + '%' : '—';
-    const fmtPx   = x => Number.isFinite(+x) ? (+x).toFixed(4) : '—';
-    const fmtQty  = x => Number.isFinite(+x) ? (+x).toFixed(6) : '—';
-    const fmtNok  = x => Number.isFinite(+x) ? (+x).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
-
-    window.latestScanRows = [];
-
-    function renderRows(rows){
-      window.latestScanRows = Array.isArray(rows) ? rows : [];
-      if (!Array.isArray(rows) || rows.length === 0) {
-        metaEl.textContent = '';
-        tbody.innerHTML = `<tr><td colspan="5">No data</td></tr>`;
-        return;
-      }
-      rows.sort((a,b) => (a["3D_Return"] ?? 9e9) - (b["3D_Return"] ?? 9e9));
-      metaEl.textContent = rows[0].Date ? `As of ${fmtDate(rows[0].Date)}` : '';
-
-      tbody.innerHTML = rows.map(r=>{
-        const lastPrice = fmtPx(r.LastPrice);
-        const ret3d     = fmtPct(r["3D_Return"]);
-        const signalRaw = (r.Signal || '').toUpperCase();
-        const signalCls = signalRaw === 'BUY' ? 'buy' : 'hold';
-        const asOf      = r.Date ? fmtDate(r.Date) : '—';
-        return `
-          <tr>
-            <td>${r.Ticker}</td>
-            <td>${lastPrice}</td>
-            <td>${ret3d}</td>
-            <td><span class="badge ${signalCls}">${signalRaw}</span></td>
-            <td>${asOf}</td>
-          </tr>`;
-      }).join('');
-    }
-
-    function parseCSV(text){
-      const lines = text.trim().split(/\r?\n/);
-      const headers = lines.shift().split(',').map(h => h.trim());
-      return lines.map(line=>{
-        const parts = line.split(',').map(v => v.trim());
-        const row = {};
-        headers.forEach((h,i)=>row[h] = parts[i] ?? '');
-        if ('3D_Return' in row) row['3D_Return'] = Number(row['3D_Return']);
-        if ('LastPrice' in row) row['LastPrice'] = Number(row['LastPrice']);
-        return row;
-      });
-    }
-
-    async function updateNavNumber(){
-      try{
-        const r = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!r.ok) return;
-        const arr = await r.json();
-        if(Array.isArray(arr) && arr.length){
-          const first = arr[0];
-          const last  = arr[arr.length-1];
-
-          const el = document.getElementById('nav-number');
-          if(el) el.textContent = fmtNok(+last.nav);
-
-          let plPct = Number(last.pl_pct);
-          if (!Number.isFinite(plPct)) {
-            const firstNav = +first.nav, lastNav = +last.nav;
-            plPct = firstNav > 0 ? (lastNav/firstNav - 1) : 0;
-          }
-
-          const plPctEl = document.getElementById('nav-pl-pct');
-          if (plPctEl) plPctEl.textContent = fmtPct(plPct);
-        }
-      }catch(e){}
-    }
-
-    async function loadSignals(){
-      try{
-        const r = await fetch(`${JSON_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if (!r.ok) throw new Error(`JSON HTTP ${r.status}`);
-        const rows = await r.json();
-        renderRows(rows);
-        loadHoldings();
-        updateNavNumber();
-        return;
-      }catch(e){ console.warn('JSON failed, falling back to CSV:', e); }
-      try{
-        const r = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if (!r.ok) throw new Error(`CSV HTTP ${r.status}`);
-        const text = await r.text();
-        renderRows(parseCSV(text));
-        loadHoldings();
-        updateNavNumber();
-      }catch(e){
-        console.error(e);
-        metaEl.textContent = 'Failed to load';
-        tbody.innerHTML = `<tr>
-          <td colspan="5" style="color:#f88">Fetch error: ${String(e)}</td>
-        </tr>`;
-      }
-    }
-
-    async function loadHoldings(){
-      const wrap  = document.getElementById('holdings');
-      const tbody = document.getElementById('holdings-rows');
-      if(!wrap || !tbody) return;
-      try{
-        const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!r.ok){
-          tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No open positions</td></tr>`;
-          return;
-        }
-        const state = await r.json();
-        const positions = state.positions || {};
-        const tickers = Object.keys(positions);
-
-        if(!tickers.length){
-          tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No open positions</td></tr>`;
-          return;
-        }
-
-        const lastByTicker = new Map(
-          (window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)])
-        );
-
-        tbody.innerHTML = tickers.map(t=>{
-          const p = positions[t];
-          const qty = +p.qty;
-          const entry = +p.entry_price;
-          const last = +(lastByTicker.get(t) ?? entry);
-          const stake = +(p.stake_nok ?? qty * entry);
-          const plNok = qty * last - stake;
-          const plPct = stake ? (plNok/stake) : 0;
-
-          return `
+  <!-- RIGHT2: TRADE LOG -->
+  <section id="right2">
+    <aside class="card" id="tradelog">
+      <h2>Trade Log</h2>
+      <div id="tradelog-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
             <tr>
-              <td>${t}</td>
-              <td>${fmtQty(qty)}</td>
-              <td>${fmtPx(entry)}</td>
-              <td>${fmtPx(last)}</td>
-              <td>${fmtNok(plNok)}</td>
-              <td>${(plPct*100).toFixed(2)}%</td>
-            </tr>`;
-        }).join('');
-      }catch(e){
-        tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No open positions</td></tr>`;
-      }
+              <th>Date</th><th>Ticker</th><th>Side</th><th>Qty</th><th>Price</th><th>Total (NOK)</th>
+            </tr>
+          </thead>
+          <tbody id="tradelog-rows">
+            <tr><td colspan="6">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </aside>
+  </section>
+
+</main>
+
+<footer id="about">
+  © 2025 H<sup>2</sup> Investors · Data auto-updated by GitHub Actions
+</footer>
+
+<!-- ===========================================================
+     JAVASCRIPT
+     =========================================================== -->
+
+<script>
+const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
+const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
+
+const JSON_URL = BASE + 'public/data/scan_3day.json';
+const CSV_URL  = BASE + 'public/data/scan_3day.csv';
+const OSEBX_URL      = BASE + 'public/data/osebx.json';
+const PORT_NAV_URL   = BASE + 'public/data/portfolio_nav.json';
+const PORT_STATE_URL = BASE + 'public/data/portfolio_state.json';
+
+const metaEl = document.getElementById('meta');
+const tbody  = document.getElementById('rows');
+
+function parseUTC(s){
+  if (typeof s !== 'string') return new Date(s);
+  const m = s.match(/^(\d{4}-\d{2}-\d{2})[ T](\d{2}):(\d{2})/);
+  return m ? new Date(`${m[1]}T${m[2]}:${m[3]}:00Z`) : new Date(s);
+}
+
+const fmtDate = s => new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(parseUTC(s));
+const fmtPct  = x => Number.isFinite(+x) ? ((+x)*100).toFixed(2) + '%' : '—';
+const fmtPx   = x => Number.isFinite(+x) ? (+x).toFixed(4) : '—';
+const fmtQty  = x => Number.isFinite(+x) ? (+x).toFixed(6) : '—';
+const fmtNok  = x => Number.isFinite(+x) ? (+x).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+
+window.latestScanRows = [];
+
+function renderRows(rows){
+  window.latestScanRows = Array.isArray(rows) ? rows : [];
+  if (!Array.isArray(rows) || rows.length === 0) {
+    metaEl.textContent = '';
+    tbody.innerHTML = `<tr><td colspan="5">No data</td></tr>`;
+    return;
+  }
+  rows.sort((a,b) => (a["3D_Return"] ?? 9e9) - (b["3D_Return"] ?? 9e9));
+  metaEl.textContent = rows[0].Date ? `As of ${fmtDate(rows[0].Date)}` : '';
+
+  tbody.innerHTML = rows.map(r=>{
+    const signalRaw = (r.Signal || '').toUpperCase();
+    const signalCls = signalRaw === 'BUY' ? 'buy' : 'hold';
+    return `
+      <tr>
+        <td>${r.Ticker}</td>
+        <td>${fmtPx(r.LastPrice)}</td>
+        <td>${fmtPct(r["3D_Return"])}</td>
+        <td><span class="badge ${signalCls}">${signalRaw}</span></td>
+        <td>${fmtDate(r.Date)}</td>
+      </tr>`;
+  }).join('');
+}
+
+function parseCSV(text){
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines.shift().split(',').map(h => h.trim());
+  return lines.map(line=>{
+    const parts = line.split(',').map(v => v.trim());
+    const row = {};
+    headers.forEach((h,i)=>row[h] = parts[i] ?? '');
+    if ('3D_Return' in row) row['3D_Return'] = Number(row['3D_Return']);
+    if ('LastPrice' in row) row['LastPrice'] = Number(row['LastPrice']);
+    return row;
+  });
+}
+
+async function updateNavNumber(){
+  try{
+    const r = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
+    if(!r.ok) return;
+    const arr = await r.json();
+    if(Array.isArray(arr) && arr.length){
+      const first = arr[0], last = arr[arr.length-1];
+      const navEl = document.getElementById('nav-number');
+      if(navEl) navEl.textContent = fmtNok(+last.nav);
+      const plEl = document.getElementById('nav-pl-pct');
+      if(plEl) plEl.textContent = fmtPct(+last.pl_pct);
+    }
+  }catch(e){}
+}
+
+async function loadSignals(){
+  try{
+    const r = await fetch(`${JSON_URL}?t=${Date.now()}`, { cache:'no-store' });
+    if (!r.ok) throw new Error(`JSON HTTP ${r.status}`);
+    renderRows(await r.json());
+    loadHoldings();
+    updateNavNumber();
+    return;
+  }catch(e){}
+
+  try{
+    const r = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache:'no-store' });
+    if (!r.ok) throw new Error(`CSV HTTP ${r.status}`);
+    renderRows(parseCSV(await r.text()));
+    loadHoldings();
+    updateNavNumber();
+  }catch(e){
+    metaEl.textContent = 'Failed to load';
+    tbody.innerHTML = `<tr><td colspan="5" style="color:#f88">Fetch error</td></tr>`;
+  }
+}
+
+async function loadHoldings(){
+  const tbody = document.getElementById('holdings-rows');
+  try{
+    const r = await fetch(`${PORT_STATE_URL}?t=${Date.now()}`, { cache:'no-store' });
+    if(!r.ok){ tbody.innerHTML = `<tr><td colspan="6">No open positions</td></tr>`; return; }
+    const state = await r.json();
+    const positions = state.positions || {};
+    const tickers = Object.keys(positions);
+    if(!tickers.length){
+      tbody.innerHTML = `<tr><td colspan="6">No open positions</td></tr>`;
+      return;
     }
 
-    async function loadTradeLog(){
-      const url = BASE + 'public/data/trade_log.csv?t=' + Date.now();
-      const tbody = document.getElementById('tradelog-rows');
-      const meta  = document.getElementById('tradelog-meta');
+    const lastByTicker = new Map(
+      (window.latestScanRows || []).map(r => [r.Ticker, Number(r.LastPrice)])
+    );
 
-      try{
-        const r = await fetch(url, {cache:'no-store'});
-        if(!r.ok) throw new Error('trade_log.csv not found');
+    tbody.innerHTML = tickers.map(t=>{
+      const p = positions[t];
+      const qty = +p.qty;
+      const entry = +p.entry_price;
+      const last = +(lastByTicker.get(t) ?? entry);
+      const stake = +(p.stake_nok ?? qty * entry);
+      const plNok = qty * last - stake;
+      const plPct = stake ? (plNok/stake) : 0;
 
-        const text = await r.text();
-        const lines = text.trim().split(/\r?\n/);
-        const headers = lines.shift().split(',');
+      return `
+        <tr>
+          <td>${t}</td>
+          <td>${fmtQty(qty)}</td>
+          <td>${fmtPx(entry)}</td>
+          <td>${fmtPx(last)}</td>
+          <td>${fmtNok(plNok)}</td>
+          <td>${(plPct*100).toFixed(2)}%</td>
+        </tr>`;
+    }).join('');
+  }catch(e){
+    tbody.innerHTML = `<tr><td colspan="6">No open positions</td></tr>`;
+  }
+}
 
-        const rows = lines.map(line=>{
-          const cols = line.split(',');
-          return Object.fromEntries(headers.map((h,i)=>[h, cols[i]]));
-        });
+async function loadTradeLog(){
+  const url = BASE + 'public/data/trade_log.csv?t=' + Date.now();
+  const tbody = document.getElementById('tradelog-rows');
+  const meta  = document.getElementById('tradelog-meta');
 
-        if(rows.length === 0){
-          tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">No trades</td></tr>`;
-          meta.textContent = '';
-          return;
+  try{
+    const r = await fetch(url, {cache:'no-store'});
+    if(!r.ok) throw new Error('trade_log.csv not found');
+
+    const text = await r.text();
+    const lines = text.trim().split(/\r?\n/);
+    const headers = lines.shift().split(',');
+
+    const rows = lines.map(line=>{
+      const cols = line.split(',');
+      return Object.fromEntries(headers.map((h,i)=>[h, cols[i]]));
+    });
+
+    if(rows.length === 0){
+      tbody.innerHTML = `<tr><td colspan="6">No trades</td></tr>`;
+      meta.textContent = '';
+      return;
+    }
+
+    meta.textContent = `Trades: ${rows.length}`;
+
+    tbody.innerHTML = rows.map(r=>`
+      <tr>
+        <td>${r.Date}</td>
+        <td>${r.Ticker}</td>
+        <td>${r.Side}</td>
+        <td>${(+r.Qty).toFixed(6)}</td>
+        <td>${(+r.Price).toFixed(4)}</td>
+        <td>${(+r.Total_NOK).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+      </tr>
+    `).join('');
+
+  }catch(e){
+    tbody.innerHTML = `<tr><td colspan="6">Could not load trade log</td></tr>`;
+    meta.textContent = '';
+  }
+}
+
+loadSignals();
+setInterval(loadSignals, 60_000);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+async function drawOsebx(){
+  const meta = document.getElementById('osebx-meta');
+  const ctx  = document.getElementById('osebx-chart').getContext('2d');
+
+  try{
+    const res = await fetch(`${OSEBX_URL}?t=${Date.now()}`, { cache:'no-store' });
+    if(!res.ok) throw new Error(`OSEBX ${res.status}`);
+
+    const o = await res.json();
+    const rows = Array.isArray(o.rows) ? o.rows : (Array.isArray(o.data) ? o.data : []);
+    const labels = rows.map(p => p.t || p.date || p.time);
+    const closes = rows.map(p => p.close ?? p.Close ?? p.c);
+
+    new Chart(ctx,{
+      type:'line',
+      data:{ labels, datasets:[{
+        label:'OSEBX',
+        data:closes,
+        borderColor:'#62b0ff',
+        borderWidth:2,
+        pointRadius:0,
+        tension:.25
+      }]},
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        layout:{ padding:{ bottom:20 } },
+        scales:{
+          x:{ticks:{maxTicksLimit:6}, grid:{display:false}},
+          y:{grid:{color:'rgba(255,255,255,0.12)'}}
+        },
+        plugins:{
+          legend:{display:true},
+          tooltip:{intersect:false,mode:'index'}
         }
-
-        meta.textContent = `Trades: ${rows.length}`;
-
-        tbody.innerHTML = rows.map(r=>`
-          <tr>
-            <td>${r.Date}</td>
-            <td>${r.Ticker}</td>
-            <td>${r.Side}</td>
-            <td>${(+r.Qty).toFixed(6)}</td>
-            <td>${(+r.Price).toFixed(4)}</td>
-            <td>${(+r.Total_NOK).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-          </tr>
-        `).join('');
-
-      }catch(e){
-        tbody.innerHTML = `<tr><td colspan="6" style="opacity:.7">Could not load trade log</td></tr>`;
-        meta.textContent = '';
-        console.warn(e);
       }
-    }
+    });
+  }catch(e){
+    meta.textContent = 'Failed to load data';
+  }
+}
 
-    loadSignals();
-    setInterval(loadSignals, 60_000);
+async function drawPortfolio(){
+  const meta = document.getElementById('portfolio-meta');
+  const ctx  = document.getElementById('portfolio-chart').getContext('2d');
 
-  </script>
+  try{
+    const res = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
+    if(!res.ok) throw new Error(`Portfolio ${res.status}`);
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    const arr = await res.json();
+    const labels = arr.map(p => p.date);
+    const navs   = arr.map(p => p.nav);
 
-  <script>
-    async function drawOsebx(){
-      const meta = document.getElementById('osebx-meta');
-      const ctx  = document.getElementById('osebx-chart').getContext('2d');
+    meta.textContent = `NAV points: ${arr.length}`;
 
-      try{
-        const res = await fetch(`${OSEBX_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!res.ok) throw new Error(`OSEBX ${res.status}`);
-
-        const o = await res.json();
-        const rows = Array.isArray(o.rows) ? o.rows : (Array.isArray(o.data) ? o.data : []);
-        const labels = rows.map(p => p.t || p.date || p.time);
-        const closes = rows.map(p => p.close ?? p.Close ?? p.c);
-
-        if(!labels.length) throw new Error('No OSEBX data');
-
-        const BASE_DATE = '2025-11-03';
-        let plLine = '';
-
-        const baseRow = rows.find(p => (p.t || p.date) === BASE_DATE);
-        const lastRow = rows[rows.length - 1];
-
-        if (baseRow && lastRow) {
-          const basePrice = Number(baseRow.close ?? baseRow.Close ?? baseRow.c);
-          const lastPrice = Number(lastRow.close ?? lastRow.Close ?? lastRow.c);
-
-          if (Number.isFinite(basePrice) && Number.isFinite(lastPrice) && basePrice > 0) {
-            const plPct = (lastPrice / basePrice - 1) * 100;
-            const sign  = plPct >= 0 ? '+' : '';
-            plLine = `P&L since ${BASE_DATE}: ${sign}${plPct.toFixed(2)}%`;
-          }
+    new Chart(ctx,{
+      type:'line',
+      data:{ labels, datasets:[{
+        label:'Portfolio',
+        data:navs,
+        borderColor:'#33e2a0',
+        borderWidth:2,
+        pointRadius:0,
+        tension:.25
+      }]},
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        layout:{ padding:{ bottom:20 } },
+        scales:{
+          x:{ticks:{maxTicksLimit:6}, grid:{display:false}},
+          y:{grid:{color:'rgba(255,255,255,0.12)'}}
+        },
+        plugins:{
+          legend:{display:true},
+          tooltip:{intersect:false,mode:'index'}
         }
-        meta.textContent = plLine || '';
-
-        new Chart(ctx,{
-          type:'line',
-          data:{ labels, datasets:[{
-            label:'OSEBX',
-            data:closes,
-            borderColor:'#62b0ff',
-            borderWidth:2,
-            pointRadius:0,
-            tension:.25
-          }]},
-          options:{
-            responsive:true,
-            maintainAspectRatio:false,
-
-            layout:{ padding:{ left:0, right:0, top:0, bottom:20 } },
-
-            scales:{
-              x:{ticks:{maxTicksLimit:6}, grid:{display:false}},
-              y:{grid:{color:'rgba(255,255,255,0.12)'}}
-            },
-            plugins:{
-              legend:{display:true},
-              tooltip:{intersect:false,mode:'index'}
-            }
-          }
-        });
-      }catch(e){
-        meta.textContent = 'Failed to load data';
-        console.error(e);
       }
-    }
+    });
+  }catch(e){
+    meta.textContent = 'No portfolio data';
+  }
+}
 
-    async function drawPortfolio(){
-      const meta = document.getElementById('portfolio-meta');
-      const ctx  = document.getElementById('portfolio-chart').getContext('2d');
-
-      try{
-        const res = await fetch(`${PORT_NAV_URL}?t=${Date.now()}`, { cache:'no-store' });
-        if(!res.ok) throw new Error(`Portfolio ${res.status}`);
-
-        const arr = await res.json();
-        if(!Array.isArray(arr) || !arr.length) throw new Error('No portfolio data yet');
-
-        const labels = arr.map(p => p.date);
-        const navs   = arr.map(p => p.nav);
-
-        meta.textContent = `NAV points: ${arr.length}`;
-
-        new Chart(ctx,{
-          type:'line',
-          data:{ labels, datasets:[{
-            label:'Portfolio',
-            data:navs,
-            borderColor:'#33e2a0',
-            borderWidth:2,
-            pointRadius:0,
-            tension:.25
-          }]},
-          options:{
-            responsive:true,
-            maintainAspectRatio:false,
-
-            layout:{ padding:{ left:0, right:0, top:0, bottom:20 } },
-
-            scales:{
-              x:{ticks:{maxTicksLimit:6}, grid:{display:false}},
-              y:{grid:{color:'rgba(255,255,255,0.12)'}}
-            },
-            plugins:{
-              legend:{display:true},
-              tooltip:{intersect:false,mode:'index'}
-            }
-          }
-        });
-      }catch(e){
-        meta.textContent = 'No portfolio data';
-        console.warn(e);
-      }
-    }
-
-    drawOsebx();
-    drawPortfolio();
-    loadTradeLog();   <!-- NEW CALL -->
-
-  </script>
+drawOsebx();
+drawPortfolio();
+loadTradeLog();
+</script>
 
 </body>
 </html>
