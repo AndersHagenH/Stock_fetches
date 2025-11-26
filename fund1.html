@@ -358,27 +358,39 @@ async function updateNavNumber(){
   }catch(e){}
 }
 
-async function loadSignals(){
-  try{
-    const r = await fetch(`${JSON_URL}?t=${Date.now()}`, { cache:'no-store' });
+async function loadSignals() {
+
+  // Try JSON version first
+  try {
+    const r = await fetch(`${JSON_URL}?t=${Date.now()}`, { cache: 'no-store' });
     if (!r.ok) throw new Error(`JSON HTTP ${r.status}`);
-    renderRows(await r.json());
+
+    const data = await r.json();
+    renderRows(data);
     loadHoldings();
     updateNavNumber();
     return;
-  }catch(e){}
 
-  try{
-    const r = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache:'no-store' });
+  } catch (e) {
+    // Continue to CSV fallback
+  }
+
+  // Fallback to CSV version
+  try {
+    const r = await fetch(`${CSV_URL}?t=${Date.now()}`, { cache: 'no-store' });
     if (!r.ok) throw new Error(`CSV HTTP ${r.status}`);
-    renderRows(parseCSV(await r.text()));
+
+    const text = await r.text();
+    renderRows(parseCSV(text));
     loadHoldings();
     updateNavNumber();
-  }catch(e){
+
+  } catch (e) {
     metaEl.textContent = 'Failed to load';
     tbody.innerHTML = `<tr><td colspan="5" style="color:#f88">Fetch error</td></tr>`;
   }
 }
+
 
 async function loadHoldings(){
   const tbody = document.getElementById('holdings-rows');
