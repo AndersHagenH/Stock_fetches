@@ -212,11 +212,15 @@
       <div style="color:var(--muted);font-size:.8rem;margin-top:8px">Data source: Yahoo Finance</div>
     </aside>
 
-    <aside class="card" id="portfolio">
-      <h2>Portfolio NAV</h2>
-      <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
-      <div class="chart"><canvas id="portfolio-chart"></canvas></div>
-    </aside>
+<aside class="card" id="portfolio">
+  <h2>Portfolio NAV</h2>
+  <div id="portfolio-meta" style="color:var(--muted);font-size:.9rem;">
+    NAV: <span id="nav-number"></span>
+    · P&L: <span id="nav-pl-pct"></span>
+  </div>
+  <div class="chart"><canvas id="portfolio-chart"></canvas></div>
+</aside>
+
 
   </section>
 
