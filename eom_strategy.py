@@ -65,13 +65,14 @@ def build_trade_signal(data, signal_dates):
     entry_prices = data.loc[today].to_dict()
     exit_date = data.index[exit_idx]
 
-return {
+    return {
         "date_generated": today.strftime("%Y-%m-%d"),
         "entry_date": today.strftime("%Y-%m-%d"),
         "exit_date": exit_date.strftime("%Y-%m-%d"),
         "tickers": TOP6,
         "entry_prices": entry_prices
     }
+
 
 
 
