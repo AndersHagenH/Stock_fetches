@@ -64,25 +64,24 @@ def today_is_signal_day(signal_dates):
 def build_trade_signal(data, signal_dates):
     today = pd.Timestamp.today().normalize()
 
-    # Official Oslo Børs calendar
     oslo = mcal.get_calendar("XOSL")
 
-    # Get next 7 trading days AFTER today
     schedule = oslo.schedule(
         start_date=today,
         end_date=today + pd.Timedelta(days=30)
     )
     trading_days = schedule.index
 
+    # Fallback logic: if fewer than 8 future trading days exist
     if len(trading_days) <= 7:
-        return None
+        exit_date = trading_days[-1]  # fallback to last available trading day
+    else:
+        exit_date = trading_days[7]
 
-    exit_date = trading_days[7]
-
-    # Today's close for entry prices
     entry_prices = data.loc[today].to_dict()
 
     return {
+        "status": "signal",
         "date_generated": today.strftime("%Y-%m-%d"),
         "entry_date": today.strftime("%Y-%m-%d"),
         "exit_date": exit_date.strftime("%Y-%m-%d"),
@@ -107,8 +106,6 @@ def save_json(obj, filename):
 def main():
     data = fetch_data()
     signal_dates = compute_signal_dates(data)
-
-    # DEBUG INFORMATION
     today = pd.Timestamp.today().normalize()
 
     print("=== DEBUG INFO ===")
@@ -125,21 +122,32 @@ def main():
     print("Signal dates this month:")
     print([d for d in signal_dates if d.month == today.month and d.year == today.year])
     print("Today is signal day?", today_is_signal_day(signal_dates))
-    print("===================")
-    print()
+    print("===================\n")
 
+    # Always produce JSON
     if not today_is_signal_day(signal_dates):
-        print("Not a signal day. Exiting silently.")
+        no_signal_obj = {
+            "status": "no-signal",
+            "date_generated": today.strftime("%Y-%m-%d"),
+            "message": "No positions entered today."
+        }
+        save_json(no_signal_obj, OUTPUT_PATH)
+        print("No positions entered.")
         return
 
-    signal = build_trade_signal(data, signal_dates)
-
-    if signal is None:
-        print("Could not generate signal (out of data range).")
-        return
-
-    save_json(signal, OUTPUT_PATH)
-    print(f"Signal generated and saved to {OUTPUT_PATH}")
+    # Signal day → attempt to produce a signal
+    try:
+        signal = build_trade_signal(data, signal_dates)
+        save_json(signal, OUTPUT_PATH)
+        print(f"Signal generated and saved to {OUTPUT_PATH}")
+    except Exception as e:
+        fallback_obj = {
+            "status": "no-signal",
+            "date_generated": today.strftime("%Y-%m-%d"),
+            "message": f"Signal day identified, but error occurred: {str(e)}"
+        }
+        save_json(fallback_obj, OUTPUT_PATH)
+        print("Signal day, but failed to generate signal. Fallback JSON saved.")
 
 
 if __name__ == "__main__":
