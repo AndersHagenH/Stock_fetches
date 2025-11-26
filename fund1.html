@@ -49,14 +49,16 @@
     #left{ grid-area:left; }
     #left2{ grid-area:left2; }
 
+    /* UPDATED: removed margin-top misalignment */
     #right-col{
       grid-area:right;
       display:flex;
       flex-direction:column;
       gap:48px;
       min-height:0;
-      margin-top:266px;
+      margin-top:0; /* FIX */
     }
+
     #right-col .card{
       flex:1 1 0;
       display:flex;
@@ -84,11 +86,15 @@
     h1{font-size:clamp(2.2rem,4vw,3.8rem);line-height:1.1;margin:0 0 18px}
     p{color:var(--muted);font-size:1.05rem;max-width:560px}
 
+    /* UPDATED: increased padding */
     .card{
-      padding:24px;border-radius:20px;border:1px solid var(--card-border);
+      padding:32px; /* was 24px */
+      border-radius:20px;
+      border:1px solid var(--card-border);
       background:linear-gradient(160deg,rgba(14,31,77,.72),rgba(2,8,23,.86));
       backdrop-filter:blur(10px)
     }
+
     .table-wrap{width:100%;overflow-x:auto;margin-top:10px}
     table{border-collapse:collapse;width:100%;font-size: clamp(.88rem, .9vw, .95rem)}
     th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.12);text-align:left}
@@ -103,7 +109,12 @@
       border-top:1px solid rgba(255,255,255,0.06)
     }
 
-    .chart{ flex:1 1 0; min-height:0; width:100%; }
+    /* UPDATED: taller charts */
+    .chart{
+      flex:1 1 0;
+      min-height:350px; /* FIX */
+      width:100%;
+    }
 
     #holdings { margin-top: 12px; }
     #holdings table th, #holdings table td { font-size:.9rem; }
@@ -132,8 +143,6 @@
 
     <!-- LEFT COLUMN -->
     <section id="left">
-      
-
       <aside class="card" id="signals" style="margin-top:40px;">
         <h2 style="margin:0 0 8px">Today’s Signals</h2>
         <div id="meta" style="color:var(--muted);font-size:.9rem;">Loading…</div>
@@ -215,7 +224,7 @@
     © 2025 H<sup>2</sup> Investors · Data auto-updated by GitHub Actions
   </footer>
 
-  <!-- ALL JAVASCRIPT BELOW (UNCHANGED FROM ORIGINAL) -->
+  <!-- JAVASCRIPT (unchanged) -->
 
   <script>
     const onProjectPage = location.hostname.endsWith('github.io') && location.pathname.includes('/Stock_fetches/');
