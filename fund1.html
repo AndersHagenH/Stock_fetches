@@ -524,30 +524,47 @@ async function drawOsebx(){
     const labels = rows.map(p => p.t || p.date || p.time);
     const closes = rows.map(p => p.close ?? p.Close ?? p.c);
 
-    new Chart(ctx,{
-      type:'line',
-      data:{ labels, datasets:[{
-        label:'OSEBX',
-        data:closes,
-        borderColor:'#62b0ff',
-        borderWidth:2,
-        pointRadius:0,
-        tension:.25
-      }]},
-      options:{
-        responsive:true,
-        maintainAspectRatio:false,
-        layout:{ padding:{ bottom:20 } },
-        scales:{
-          x:{ticks:{maxTicksLimit:6}, grid:{display:false}},
-          y:{grid:{color:'rgba(255,255,255,0.12)'}}
-        },
-        plugins:{
-          legend:{display:true},
-          tooltip:{intersect:false,mode:'index'}
-        }
-      }
-    });
+ // --- Calculate P&L ---
+const BASE_DATE = labels[0];
+let plLine = '';
+
+const basePrice = closes[0];
+const lastPrice = closes[closes.length - 1];
+
+if (Number.isFinite(basePrice) && Number.isFinite(lastPrice) && basePrice > 0) {
+  const plPct = (lastPrice / basePrice - 1) * 100;
+  const sign = plPct >= 0 ? '+' : '';
+  plLine = `P&L since ${BASE_DATE}: ${sign}${plPct.toFixed(2)}%`;
+}
+
+meta.textContent = plLine || '';
+
+// --- Draw chart ---
+new Chart(ctx,{
+  type:'line',
+  data:{ labels, datasets:[{
+    label:'OSEBX',
+    data:closes,
+    borderColor:'#62b0ff',
+    borderWidth:2,
+    pointRadius:0,
+    tension:.25
+  }]},
+  options:{
+    responsive:true,
+    maintainAspectRatio:false,
+    layout:{ padding:{ bottom:20 } },
+    scales:{
+      x:{ticks:{maxTicksLimit:6}, grid:{display:false}},
+      y:{grid:{color:'rgba(255,255,255,0.12)'}}
+    },
+    plugins:{
+      legend:{display:true},
+      tooltip:{intersect:false,mode:'index'}
+    }
+  }
+});
+
   }catch(e){
     meta.textContent = 'Failed to load data';
   }
