@@ -1,0 +1,24 @@
+{
+    "date_generated": "2025-11-27",
+    "tickers": [
+        "DNO.OL",
+        "CADLR.OL",
+        "SOMA.OL",
+        "AUTO.OL",
+        "BWE.OL",
+        "VAR.OL"
+    ],
+    "data_last_date": "2025-11-27",
+    "latest_prices": {
+        "AUTO.OL": 11.0,
+        "BWE.OL": 39.150001525878906,
+        "CADLR.OL": 43.63999938964844,
+        "DNO.OL": 14.390000343322754,
+        "SOMA.OL": 18.5,
+        "VAR.OL": 31.350000381469727
+    },
+    "signal_date": "2025-11-26",
+    "is_signal_day": false,
+    "status": "no-signal",
+    "message": "No positions entered today."
+}
