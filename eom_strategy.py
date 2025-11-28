@@ -243,10 +243,12 @@ def main():
         )
         trading_days = schedule.index
 
-        if len(trading_days) <= 7:
-            exit_date = trading_days[-1]
-        else:
+        # exit on the 7th trading day after the last day of the month
+        if len(trading_days) > 7:
             exit_date = trading_days[7]
+        else:
+            exit_date = trading_days[-1]
+
 
         exit_date_str = exit_date.strftime("%Y-%m-%d")
 
