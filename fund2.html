@@ -21,21 +21,47 @@
       --text:#f8fbff;
       --muted:rgba(248,251,255,0.68);
     }
+
     *{box-sizing:border-box}
+
     body{
-      margin:0;min-height:100vh;display:flex;flex-direction:column;
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
       font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-      background:var(--bg-gradient);color:var(--text)
+      background:var(--bg-gradient);
+      color:var(--text)
     }
 
     header{
       padding:24px clamp(16px, 8vw, 96px);
-      display:flex;align-items:center;justify-content:space-between
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
     }
-    .logo{font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.95rem}
-    nav{display:flex;gap:24px;font-size:.95rem}
-    nav a{color:var(--muted);text-decoration:none}
-    nav a:hover{color:var(--text)}
+
+    .logo{
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      font-size:.95rem;
+    }
+
+    nav{
+      display:flex;
+      gap:24px;
+      font-size:.95rem;
+    }
+
+    nav a{
+      color:var(--muted);
+      text-decoration:none;
+    }
+
+    nav a:hover{
+      color:var(--text);
+    }
 
     main{
       flex:1;
@@ -44,30 +70,63 @@
     }
 
     .eyebrow{
-      display:inline-flex;gap:8px;padding:6px 14px;border-radius:999px;
-      background:rgba(51,226,160,.12);border:1px solid rgba(51,226,160,.32);
-      color:var(--accent);font-size:.78rem;letter-spacing:.14em;
-      margin-bottom:18px;text-transform:uppercase
+      display:inline-flex;
+      gap:8px;
+      padding:6px 14px;
+      border-radius:999px;
+      background:rgba(51,226,160,.12);
+      border:1px solid rgba(51,226,160,.32);
+      color:var(--accent);
+      font-size:.78rem;
+      letter-spacing:.14em;
+      margin-bottom:18px;
+      text-transform:uppercase;
     }
 
-    h1{font-size:clamp(2.2rem,4vw,3.8rem);line-height:1.1;margin:0 0 18px}
-    p{color:var(--muted);font-size:1.05rem;max-width:560px}
+    h1{
+      font-size:clamp(2.2rem,4vw,3.8rem);
+      line-height:1.1;
+      margin:0 0 18px;
+    }
+
+    p{
+      color:var(--muted);
+      font-size:1.05rem;
+      max-width:560px;
+    }
 
     .card{
-      padding:24px;border-radius:20px;border:1px solid var(--card-border);
+      padding:24px;
+      border-radius:20px;
+      border:1px solid var(--card-border);
       background:linear-gradient(160deg,rgba(14,31,77,.72),rgba(2,8,23,.86));
       backdrop-filter:blur(10px);
       margin-top:40px;
     }
 
-    table{width:100%;border-collapse:collapse;margin-top:16px;font-size:.92rem}
-    th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.12)}
-    th{background:rgba(255,255,255,.06);text-align:left}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:16px;
+      font-size:.92rem;
+    }
+
+    th,td{
+      padding:10px 12px;
+      border-bottom:1px solid rgba(255,255,255,.12);
+    }
+
+    th{
+      background:rgba(255,255,255,.06);
+      text-align:left;
+    }
 
     footer{
       padding:36px clamp(16px, 8vw, 96px) 40px;
-      color:var(--muted);font-size:.88rem;text-align:center;
-      border-top:1px solid rgba(255,255,255,0.06)
+      color:var(--muted);
+      font-size:.88rem;
+      text-align:center;
+      border-top:1px solid rgba(255,255,255,0.06);
     }
   </style>
 </head>
@@ -92,7 +151,10 @@
 <main>
     <aside class="card" id="signal-card">
       <h2 style="margin:0 0 12px">Latest Signal</h2>
-      <div id="signal-content" style="color:var(--muted);font-size:.95rem;">Loading…</div>
+
+      <!-- FIXED: now uses var(--text) instead of var(--muted) -->
+      <div id="signal-content" style="color:var(--text);font-size:.95rem;">Loading…</div>
+
     </aside>
 </main>
 
@@ -105,7 +167,6 @@
                         location.pathname.includes('/Stock_fetches/');
   const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
 
-  // Correct JSON filename
   const EOM_URL = BASE + 'public/data/eom_signal.json';
 
   async function loadSignal(){
@@ -122,17 +183,16 @@
       const data = await res.json();
 
       let html = `
-  <div style="font-size:1rem; margin-bottom:12px;">
-    <strong>Latest Price Update:</strong> ${data.data_last_date}
-  </div>
+        <div style="font-size:1rem; margin-bottom:12px;">
+          <strong>Latest Price Update:</strong> ${data.data_last_date}
+        </div>
 
-  <table>
-    <thead>
-      <tr><th>Ticker</th><th>Latest Price</th></tr>
-    </thead>
-    <tbody>
-`;
-
+        <table>
+          <thead>
+            <tr><th>Ticker</th><th>Latest Price</th></tr>
+          </thead>
+          <tbody>
+      `;
 
       for (const t of data.tickers){
         const px = data.latest_prices[t];
@@ -141,7 +201,6 @@
 
       html += `</tbody></table><br>`;
 
-      // ---- SIGNAL SECTION ----
       if (data.is_signal_day){
         html += `
           <div style="margin-top:16px;">
