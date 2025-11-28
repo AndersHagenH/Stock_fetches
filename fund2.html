@@ -109,6 +109,7 @@
       border-collapse:collapse;
       margin-top:16px;
       font-size:.92rem;
+      color:var(--text);
     }
 
     th,td{
@@ -152,7 +153,6 @@
     <aside class="card" id="signal-card">
       <h2 style="margin:0 0 12px">Latest Signal</h2>
 
-      <!-- FIXED: now uses var(--text) instead of var(--muted) -->
       <div id="signal-content" style="color:var(--text);font-size:.95rem;">Loading…</div>
 
     </aside>
@@ -163,10 +163,11 @@
 </footer>
 
 <script>
-  const onProjectPage = location.hostname.endsWith('github.io') &&
-                        location.pathname.includes('/Stock_fetches/');
-  const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
+  const onProjectPage =
+    location.hostname.endsWith('github.io') &&
+    location.pathname.includes('/Stock_fetches/');
 
+  const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
   const EOM_URL = BASE + 'public/data/eom_signal.json';
 
   async function loadSignal(){
@@ -174,7 +175,6 @@
 
     try{
       const res = await fetch(EOM_URL + '?t=' + Date.now(), { cache:'no-store' });
-
       if (!res.ok){
         box.textContent = "Unable to load data.";
         return;
@@ -189,14 +189,29 @@
 
         <table>
           <thead>
-            <tr><th>Ticker</th><th>Latest Price</th></tr>
+            <tr>
+              <th>Ticker</th>
+              <th>Latest Price</th>
+              <th>Entry Price</th>
+              <th>Exit Price</th>
+            </tr>
           </thead>
           <tbody>
       `;
 
       for (const t of data.tickers){
-        const px = data.latest_prices[t];
-        html += `<tr><td>${t}</td><td>${px.toFixed(4)}</td></tr>`;
+        const last  = data.latest_prices?.[t];
+        const entry = data.entry_prices?.[t];
+        const exit  = data.exit_prices?.[t];
+
+        html += `
+          <tr>
+            <td>${t}</td>
+            <td>${Number.isFinite(last)  ? last.toFixed(4)  : "—"}</td>
+            <td>${Number.isFinite(entry) ? entry.toFixed(4) : "—"}</td>
+            <td>${Number.isFinite(exit)  ? exit.toFixed(4)  : "—"}</td>
+          </tr>
+        `;
       }
 
       html += `</tbody></table><br>`;
@@ -207,19 +222,8 @@
             <strong style="color:#33e2a0;">SIGNAL TODAY:</strong><br>
             <div><strong>Entry Date:</strong> ${data.entry_date}</div>
             <div><strong>Exit Date:</strong> ${data.exit_date}</div>
-            <br>
-            <strong>Entry Prices:</strong>
-            <table>
-              <thead><tr><th>Ticker</th><th>Entry Price</th></tr></thead>
-              <tbody>
+          </div>
         `;
-
-        for (const t of data.tickers){
-          const px = data.entry_prices[t];
-          html += `<tr><td>${t}</td><td>${px.toFixed(4)}</td></tr>`;
-        }
-
-        html += `</tbody></table>`;
       } else {
         html += `<div><strong>No signal today.</strong></div>`;
       }
