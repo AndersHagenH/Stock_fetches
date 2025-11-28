@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
-    :root{
+    :root {
       color-scheme: light;
       --bg-gradient: radial-gradient(circle at top, #0e1f4d 0%, #020817 50%, #010513 100%);
       --card-bg: rgba(255,255,255,0.08);
@@ -22,56 +22,47 @@
       --muted:rgba(248,251,255,0.68);
     }
 
-    *{box-sizing:border-box}
+    * { box-sizing:border-box }
 
-    body{
+    body {
       margin:0;
       min-height:100vh;
       display:flex;
       flex-direction:column;
-      font-family:'Poppins',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      font-family:'Poppins',sans-serif;
       background:var(--bg-gradient);
-      color:var(--text)
+      color:var(--text);
     }
 
-    header{
+    header {
       padding:24px clamp(16px, 8vw, 96px);
       display:flex;
       align-items:center;
       justify-content:space-between;
     }
 
-    .logo{
+    .logo {
       font-weight:700;
       letter-spacing:.08em;
       text-transform:uppercase;
       font-size:.95rem;
     }
 
-    nav{
-      display:flex;
-      gap:24px;
-      font-size:.95rem;
-    }
+    nav { display:flex; gap:24px; font-size:.95rem; }
+    nav a { color:var(--muted); text-decoration:none; }
+    nav a:hover { color:var(--text); }
 
-    nav a{
-      color:var(--muted);
-      text-decoration:none;
-    }
-
-    nav a:hover{
-      color:var(--text);
-    }
-
-    main{
+    main {
       flex:1;
+      display:grid;
+      grid-template-columns: minmax(320px, 600px) 1fr;
+      gap:48px;
       padding:0 8vw 10vh;
-      max-width:720px;
+      margin-top:20px;
     }
 
-    .eyebrow{
-      display:inline-flex;
-      gap:8px;
+    .eyebrow {
+      display:inline-flex; gap:8px;
       padding:6px 14px;
       border-radius:999px;
       background:rgba(51,226,160,.12);
@@ -83,28 +74,27 @@
       text-transform:uppercase;
     }
 
-    h1{
+    h1 {
       font-size:clamp(2.2rem,4vw,3.8rem);
-      line-height:1.1;
-      margin:0 0 18px;
+      line-height:1.1; margin:0 0 18px;
     }
 
-    p{
+    p {
       color:var(--muted);
       font-size:1.05rem;
       max-width:560px;
     }
 
-    .card{
+    .card {
       padding:24px;
       border-radius:20px;
       border:1px solid var(--card-border);
       background:linear-gradient(160deg,rgba(14,31,77,.72),rgba(2,8,23,.86));
       backdrop-filter:blur(10px);
-      margin-top:40px;
+      min-height:200px;
     }
 
-    table{
+    table {
       width:100%;
       border-collapse:collapse;
       margin-top:16px;
@@ -112,17 +102,28 @@
       color:var(--text);
     }
 
-    th,td{
+    th, td {
       padding:10px 12px;
       border-bottom:1px solid rgba(255,255,255,.12);
     }
 
-    th{
+    th {
       background:rgba(255,255,255,.06);
       text-align:left;
     }
 
-    footer{
+    .chart {
+      width:100%;
+      height:350px;
+    }
+
+    .chart canvas {
+      width:100% !important;
+      height:100% !important;
+      display:block;
+    }
+
+    footer {
       padding:36px clamp(16px, 8vw, 96px) 40px;
       color:var(--muted);
       font-size:.88rem;
@@ -134,108 +135,173 @@
 
 <body>
 
-  <header>
-    <div class="logo">H<sup>2</sup> Investors</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="#backtest">Backtest</a>
-      <a href="#about">About</a>
-    </nav>
-  </header>
+<header>
+  <div class="logo">H<sup>2</sup> Investors</div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="#backtest">Backtest</a>
+    <a href="#about">About</a>
+  </nav>
+</header>
 
-<section class="hero" style="padding:0 8vw 40px; margin-top:40px;">
+<section style="padding:0 8vw 40px; margin-top:40px;">
   <div class="eyebrow">Fund 2</div>
   <h1 style="white-space:nowrap;">End-of-Month Strategy</h1>
-  <p style="max-width:560px;">The strategy generates signals only on the 5th last trading day of each month.</p>
+  <p>The strategy buys on the last trading day of the month and holds for 7 trading days.</p>
 </section>
 
 <main>
-    <aside class="card" id="signal-card">
-      <h2 style="margin:0 0 12px">Latest Signal</h2>
 
-      <div id="signal-content" style="color:var(--text);font-size:.95rem;">Loading…</div>
+  <!-- LEFT: SIGNAL CARD -->
+  <aside class="card" id="signal-card">
+    <h2 style="margin:0 0 12px">Latest Signal</h2>
+    <div id="signal-content" style="color:var(--text);font-size:.95rem;">Loading…</div>
+  </aside>
 
-    </aside>
+  <!-- RIGHT: NAV CHART -->
+  <aside class="card" id="nav-card">
+    <h2>Portfolio NAV</h2>
+    <div id="nav-meta" style="color:var(--muted);font-size:.9rem; margin-bottom:10px;">
+      NAV: <span id="nav-number">—</span> ·
+      P&L: <span id="nav-pl">—</span>
+    </div>
+    <div class="chart"><canvas id="nav-chart"></canvas></div>
+  </aside>
+
 </main>
 
 <footer id="about">
   © 2025 H<sup>2</sup> Investors · Strategy auto-updated by GitHub Actions
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-  const onProjectPage =
-    location.hostname.endsWith('github.io') &&
-    location.pathname.includes('/Stock_fetches/');
+const onProject = location.hostname.endsWith('github.io') &&
+                  location.pathname.includes('/Stock_fetches/');
+const BASE = onProject ? '' : 'https://andershagenh.github.io/Stock_fetches/';
 
-  const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
-  const EOM_URL = BASE + 'public/data/eom_signal.json';
+const EOM_URL = BASE + 'public/data/eom_signal.json';
+const NAV_URL = BASE + 'public/data/fund2_nav.json';
 
-  async function loadSignal(){
-    const box = document.getElementById('signal-content');
+async function loadSignal(){
+  const box = document.getElementById('signal-content');
 
-    try{
-      const res = await fetch(EOM_URL + '?t=' + Date.now(), { cache:'no-store' });
-      if (!res.ok){
-        box.textContent = "Unable to load data.";
-        return;
-      }
+  try {
+    const res = await fetch(EOM_URL + '?t=' + Date.now(), { cache:'no-store' });
+    if (!res.ok) { box.textContent = "Unable to load data."; return; }
 
-      const data = await res.json();
+    const data = await res.json();
 
-      let html = `
-        <div style="font-size:1rem; margin-bottom:12px;">
-          <strong>Latest Price Update:</strong> ${data.data_last_date}
-        </div>
+    let html = `
+      <div style="font-size:1rem; margin-bottom:12px;">
+        <strong>Latest Price Update:</strong> ${data.data_last_date}
+      </div>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Ticker</th>
-              <th>Latest Price</th>
-              <th>Entry Price</th>
-              <th>Exit Price</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-
-      for (const t of data.tickers){
-        const last  = data.latest_prices?.[t];
-        const entry = data.entry_prices?.[t];
-        const exit  = data.exit_prices?.[t];
-
-        html += `
+      <table>
+        <thead>
           <tr>
-            <td>${t}</td>
-            <td>${Number.isFinite(last)  ? last.toFixed(4)  : "—"}</td>
-            <td>${Number.isFinite(entry) ? entry.toFixed(4) : "—"}</td>
-            <td>${Number.isFinite(exit)  ? exit.toFixed(4)  : "—"}</td>
+            <th>Ticker</th>
+            <th>Latest</th>
+            <th>Entry</th>
+            <th>Exit</th>
           </tr>
-        `;
-      }
+        </thead>
+        <tbody>
+    `;
 
-      html += `</tbody></table><br>`;
+    for (const t of data.tickers){
+      const last  = data.latest_prices?.[t];
+      const entry = data.entry_prices?.[t];
+      const exit  = data.exit_prices?.[t];
 
-      if (data.is_signal_day){
-        html += `
-          <div style="margin-top:16px;">
-            <strong style="color:#33e2a0;">SIGNAL TODAY:</strong><br>
-            <div><strong>Entry Date:</strong> ${data.entry_date}</div>
-            <div><strong>Exit Date:</strong> ${data.exit_date}</div>
-          </div>
-        `;
-      } else {
-        html += `<div><strong>No signal today.</strong></div>`;
-      }
-
-      box.innerHTML = html;
-
-    }catch(err){
-      box.textContent = "Error loading data.";
+      html += `
+        <tr>
+          <td>${t}</td>
+          <td>${Number.isFinite(last) ? last.toFixed(4) : "—"}</td>
+          <td>${Number.isFinite(entry) ? entry.toFixed(4) : "—"}</td>
+          <td>${Number.isFinite(exit) ? exit.toFixed(4) : "—"}</td>
+        </tr>
+      `;
     }
-  }
 
-  loadSignal();
+    html += `</tbody></table><br>`;
+
+    if (data.is_signal_day){
+      html += `
+        <div style="margin-top:16px;">
+          <strong style="color:#33e2a0;">SIGNAL TODAY:</strong><br>
+          <div><strong>Entry Date:</strong> ${data.entry_date}</div>
+          <div><strong>Exit Date:</strong> ${data.exit_date}</div>
+        </div>
+      `;
+    } else {
+      html += `<div><strong>No signal today.</strong></div>`;
+    }
+
+    box.innerHTML = html;
+
+  } catch (err) {
+    box.textContent = "Error loading data.";
+  }
+}
+
+async function loadNAV(){
+  const meta = document.getElementById("nav-meta");
+  const navNum = document.getElementById("nav-number");
+  const navPL = document.getElementById("nav-pl");
+  const ctx = document.getElementById("nav-chart").getContext("2d");
+
+  try {
+    const res = await fetch(NAV_URL + '?t=' + Date.now(), { cache:'no-store' });
+    if (!res.ok) return;
+
+    const arr = await res.json();
+    if (!Array.isArray(arr) || !arr.length) return;
+
+    const labels = arr.map(d => d.date);
+    const navs   = arr.map(d => d.nav);
+
+    const first = navs[0];
+    const last = navs[navs.length - 1];
+
+    navNum.textContent = last.toFixed(2);
+    navPL.textContent = (((last / first) - 1) * 100).toFixed(2) + "%";
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Fund 2 NAV',
+          data: navs,
+          borderColor: '#33e2a0',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.25
+        }]
+      },
+      options: {
+        responsive:true,
+        maintainAspectRatio:false,
+        scales:{
+          x:{ grid:{display:false}, ticks:{maxTicksLimit:6}},
+          y:{ grid:{color:'rgba(255,255,255,0.12)'}}
+        },
+        plugins:{
+          legend:{display:true},
+          tooltip:{intersect:false, mode:'index'}
+        }
+      }
+    });
+
+  } catch (err) {
+    console.log("NAV load error", err);
+  }
+}
+
+loadSignal();
+loadNAV();
 </script>
 
 </body>
