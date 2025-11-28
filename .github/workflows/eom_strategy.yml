@@ -34,7 +34,7 @@ jobs:
           pip install numpy
           pip install requests
           pip install pytz
-          pip install pandas-market-calendars   # <-- REQUIRED FIX
+          pip install pandas-market-calendars
 
       - name: Run EOM strategy
         run: python eom_strategy.py
@@ -43,6 +43,12 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add public/data/eom_signal.json || true
-          git commit -m "update eom signal" || echo "no changes"
+          
+          # Add ALL relevant data files
+          git add public/data/eom_signal.json \
+                 public/data/fund2_state.json \
+                 public/data/fund2_nav.json \
+                 public/data/fund2_tradelog.csv || true
+
+          git commit -m "update EOM signal + NAV + state + tradelog" || echo "no changes"
           git push
