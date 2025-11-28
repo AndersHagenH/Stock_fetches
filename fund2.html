@@ -37,7 +37,6 @@
     nav a{color:var(--muted);text-decoration:none}
     nav a:hover{color:var(--text)}
 
-    /* Same main padding + spacing as Fund1 */
     main{
       flex:1;
       padding:0 8vw 10vh;
@@ -84,7 +83,6 @@
     </nav>
   </header>
 
- <!-- FULL-WIDTH HERO SECTION (same spacing as Fund 1) -->
 <section class="hero" style="padding:0 8vw 40px; margin-top:40px;">
   <div class="eyebrow">Fund 2</div>
   <h1 style="white-space:nowrap;">End-of-Month Strategy</h1>
@@ -92,55 +90,68 @@
 </section>
 
 <main>
-
-
-    <!-- SIGNAL CARD -->
     <aside class="card" id="signal-card">
       <h2 style="margin:0 0 12px">Latest Signal</h2>
       <div id="signal-content" style="color:var(--muted);font-size:.95rem;">Loading…</div>
     </aside>
+</main>
 
-  </main>
+<footer id="about">
+  © 2025 H<sup>2</sup> Investors · Strategy auto-updated by GitHub Actions
+</footer>
 
-  <footer id="about">
-    © 2025 H<sup>2</sup> Investors · Strategy auto-updated by GitHub Actions
-  </footer>
+<script>
+  const onProjectPage = location.hostname.endsWith('github.io') &&
+                        location.pathname.includes('/Stock_fetches/');
+  const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
 
-  <script>
-    const onProjectPage = location.hostname.endsWith('github.io') &&
-                          location.pathname.includes('/Stock_fetches/');
-    const BASE = onProjectPage ? '' : 'https://andershagenh.github.io/Stock_fetches/';
-    const EOM_URL = BASE + 'public/data/eom_strategy.json';
+  // Correct JSON filename
+  const EOM_URL = BASE + 'public/data/eom_signal.json';
 
-    async function loadSignal(){
-      const box = document.getElementById('signal-content');
+  async function loadSignal(){
+    const box = document.getElementById('signal-content');
 
-      try{
-        const res = await fetch(EOM_URL + '?t=' + Date.now(), { cache:'no-store' });
+    try{
+      const res = await fetch(EOM_URL + '?t=' + Date.now(), { cache:'no-store' });
 
-        if (!res.ok){
-          box.textContent = "No signal today.";
-          return;
-        }
+      if (!res.ok){
+        box.textContent = "Unable to load data.";
+        return;
+      }
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (!data || !data.entry_date){
-          box.textContent = "No signal today.";
-          return;
-        }
+      let html = `
+        <div><strong>Generated:</strong> ${data.date_generated}</div>
+        <div><strong>Price Date:</strong> ${data.data_last_date}</div>
+        <br>
+        <div><strong>Tickers & Latest Prices:</strong></div>
+        <table>
+          <thead>
+            <tr><th>Ticker</th><th>Latest Price</th></tr>
+          </thead>
+          <tbody>
+      `;
 
-        let html = `
-          <div><strong>Generated:</strong> ${data.date_generated}</div>
-          <div><strong>Entry Date:</strong> ${data.entry_date}</div>
-          <div><strong>Exit Date:</strong> ${data.exit_date}</div>
-          <br>
-          <div><strong>Tickers:</strong></div>
-          <table>
-            <thead>
-              <tr><th>Ticker</th><th>Entry Price</th></tr>
-            </thead>
-            <tbody>
+      for (const t of data.tickers){
+        const px = data.latest_prices[t];
+        html += `<tr><td>${t}</td><td>${px.toFixed(4)}</td></tr>`;
+      }
+
+      html += `</tbody></table><br>`;
+
+      // ---- SIGNAL SECTION ----
+      if (data.is_signal_day){
+        html += `
+          <div style="margin-top:16px;">
+            <strong style="color:#33e2a0;">SIGNAL TODAY:</strong><br>
+            <div><strong>Entry Date:</strong> ${data.entry_date}</div>
+            <div><strong>Exit Date:</strong> ${data.exit_date}</div>
+            <br>
+            <strong>Entry Prices:</strong>
+            <table>
+              <thead><tr><th>Ticker</th><th>Entry Price</th></tr></thead>
+              <tbody>
         `;
 
         for (const t of data.tickers){
@@ -149,15 +160,19 @@
         }
 
         html += `</tbody></table>`;
-        box.innerHTML = html;
-
-      }catch(err){
-        box.textContent = "No signal today.";
+      } else {
+        html += `<div><strong>No signal today.</strong></div>`;
       }
-    }
 
-    loadSignal();
-  </script>
+      box.innerHTML = html;
+
+    }catch(err){
+      box.textContent = "Error loading data.";
+    }
+  }
+
+  loadSignal();
+</script>
 
 </body>
 </html>
