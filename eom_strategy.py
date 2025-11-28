@@ -18,32 +18,32 @@ START_DATE = "2010-01-01"
 
 OUTPUT_PATH = "public/data/eom_signal.json"       # JSON for frontend
 STATE_PATH = "public/data/fund2_state.json"       # Persistent NAV + positions
-TRADELOG_PATH = "public/data/fund2_tradelog.csv"  # Trade log (like Fund 1)
+TRADELOG_PATH = "public/data/fund2_tradelog.csv"  # Trade log
+NAV_PATH = "public/data/fund2_nav.json"           # NAV time series (NEW)
 
-INITIAL_NAV = 100_000.0  # starting NAV for fund 2
-FEES_NOK = 0.0           # per-trade fees, if any
+INITIAL_NAV = 50_000.0     # <-- Updated
+FEE_PER_TRADE = 29.0       # <-- Updated (BUY or SELL)
+ROUND_TRIP_FEE = 58.0      # (not used directly, but implied)
 
 
 # ============================================================
-# 2. FILE HELPERS: STATE + TRADELOG
+# 2. FILE HELPERS: STATE + NAV + TRADELOG
 # ============================================================
 
 def ensure_dirs():
-    """Ensure public/data/ exists."""
     dirname = os.path.dirname(OUTPUT_PATH)
     if dirname and not os.path.isdir(dirname):
         os.makedirs(dirname, exist_ok=True)
 
 
 def load_state():
-    """Load persistent state (NAV, open positions, planned exit date)."""
     ensure_dirs()
     if not os.path.isfile(STATE_PATH):
         state = {
             "initial_nav": INITIAL_NAV,
             "nav": INITIAL_NAV,
-            "open_positions": {},         # ticker -> {qty, entry_price, entry_date, stake_nok}
-            "planned_exit_date": None,    # "YYYY-MM-DD" or None
+            "open_positions": {},
+            "planned_exit_date": None,
             "last_signal_date": None
         }
         save_state(state)
@@ -59,8 +59,30 @@ def save_state(state):
         json.dump(state, f, indent=4)
 
 
+def load_nav_history():
+    if not os.path.isfile(NAV_PATH):
+        return []
+    with open(NAV_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save_nav_history(nav_history):
+    with open(NAV_PATH, "w", encoding="utf-8") as f:
+        json.dump(nav_history, f, indent=4)
+
+
+def record_nav(date_str, nav_value):
+    history = load_nav_history()
+
+    if history and history[-1]["date"] == date_str:
+        history[-1]["nav"] = nav_value
+    else:
+        history.append({"date": date_str, "nav": nav_value})
+
+    save_nav_history(history)
+
+
 def ensure_tradelog_exists():
-    """Create tradelog with header if missing."""
     ensure_dirs()
     if not os.path.isfile(TRADELOG_PATH):
         with open(TRADELOG_PATH, "w", newline="", encoding="utf-8") as f:
@@ -73,30 +95,24 @@ def ensure_tradelog_exists():
             ])
 
 
-def append_entry_trade(ticker, entry_date, entry_price, qty, stake_nok, fees_nok):
-    """Log a BUY trade with empty exit fields."""
+def append_entry_trade(ticker, entry_date, entry_price, qty, stake_nok):
+    """Log BUY. Fee charged = FEE_PER_TRADE."""
     with open(TRADELOG_PATH, "a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow([
             ticker,
             entry_date,
             float(entry_price),
-            "",          # ExitDate
-            "",          # ExitPrice
+            "", "",                 # exit fields
             float(qty),
             float(stake_nok),
-            float(fees_nok),
-            "",          # PL_NOK
-            "",          # PL_PCT
+            float(FEE_PER_TRADE),   # <-- BUY cost
+            "", "",
             "BUY"
         ])
 
 
 def close_open_trades(exit_date_str, exit_prices):
-    """
-    Fill exit information for all open trades in the tradelog.
-    exit_prices: dict[ticker] -> exit_price
-    """
     if not os.path.isfile(TRADELOG_PATH):
         return
 
@@ -112,11 +128,16 @@ def close_open_trades(exit_date_str, exit_prices):
         qty = float(row["Qty"])
         stake = float(row["StakeNOK"])
 
-        pl_nok = qty * exit_price - stake
-        pl_pct = pl_nok / stake if stake != 0 else 0.0
+        buy_fee = float(row["FeesNOK"])
+        sell_fee = FEE_PER_TRADE                     # <-- SELL cost
+        total_fees = buy_fee + sell_fee
+
+        pl_nok = qty * exit_price - stake - sell_fee  # SELL fee reduces proceeds
+        pl_pct = pl_nok / stake if stake != 0 else 0
 
         df.loc[idx, "ExitDate"] = exit_date_str
         df.loc[idx, "ExitPrice"] = exit_price
+        df.loc[idx, "FeesNOK"] = total_fees           # now contains buy+sell
         df.loc[idx, "PL_NOK"] = pl_nok
         df.loc[idx, "PL_PCT"] = pl_pct
         df.loc[idx, "Reason"] = "SELL"
@@ -125,7 +146,7 @@ def close_open_trades(exit_date_str, exit_prices):
 
 
 # ============================================================
-# 3. DOWNLOAD LATEST DATA
+# 3. DOWNLOAD DATA
 # ============================================================
 
 def fetch_data():
@@ -135,15 +156,14 @@ def fetch_data():
 
 
 # ============================================================
-# 4. FIND 3RD LAST TRADING DAY OF EACH MONTH (OFFICIAL XOSL CALENDAR)
+# 4. SIGNAL DATE = LAST TRADING DAY OF EACH MONTH
 # ============================================================
 
 def compute_signal_dates(data):
     oslo = mcal.get_calendar("XOSL")
     signal_dates = []
 
-    all_dates = data.index
-    years_months = sorted(set((d.year, d.month) for d in all_dates))
+    years_months = sorted(set((d.year, d.month) for d in data.index))
 
     for year, month in years_months:
         start = pd.Timestamp(year=year, month=month, day=1)
@@ -153,11 +173,9 @@ def compute_signal_dates(data):
         trading_days = schedule.index
 
         if len(trading_days) >= 1:
-            # last trading day of the month
             signal_dates.append(trading_days[-1])
 
     return pd.DatetimeIndex(signal_dates)
-
 
 
 # ============================================================
@@ -171,14 +189,13 @@ def save_json(obj, filename):
 
 
 # ============================================================
-# 6. MAIN EXECUTION LOGIC
+# 6. MAIN LOGIC
 # ============================================================
 
 def main():
     ensure_dirs()
     ensure_tradelog_exists()
 
-    # --- Load history & state ---
     data = fetch_data()
     state = load_state()
     signal_dates = compute_signal_dates(data)
@@ -186,168 +203,148 @@ def main():
     today = pd.Timestamp.today().normalize()
     today_str = today.strftime("%Y-%m-%d")
 
-    # Last available price date
     last_data_date = data.index[-1]
     last_data_date_str = last_data_date.strftime("%Y-%m-%d")
     latest_prices = data.loc[last_data_date].to_dict()
 
-    # Find this month's 3rd-last trading day
-    this_month_signals = [
-        d for d in signal_dates
-        if d.year == today.year and d.month == today.month
-    ]
-    signal_date = this_month_signals[0] if this_month_signals else None
-    signal_date_str = signal_date.strftime("%Y-%m-%d") if signal_date is not None else None
+    # Check signal day
+    this_month = [d for d in signal_dates if d.year == today.year and d.month == today.month]
+    signal_date = this_month[0] if this_month else None
+    signal_date_str = signal_date.strftime("%Y-%m-%d") if signal_date else None
     is_signal_day = signal_date is not None and today == signal_date.normalize()
 
-    has_open_positions = bool(state.get("open_positions"))
+    has_open_positions = bool(state["open_positions"])
     planned_exit_date = state.get("planned_exit_date")
-    is_exit_day = bool(planned_exit_date) and (planned_exit_date == today_str) and has_open_positions
+    is_exit_day = planned_exit_date == today_str and has_open_positions
 
-    # --------------------------------------------------------
-    # EXIT LOGIC (close positions on planned exit date)
-    # --------------------------------------------------------
+    # ============================================================
+    # EXIT LOGIC
+    # ============================================================
+
     exit_prices_dict = None
 
     if is_exit_day:
         exit_prices_dict = {}
         nav_new = 0.0
+        total_sell_fees = 0.0
 
         for t, pos in state["open_positions"].items():
-            if t not in latest_prices:
-                continue
-            exit_price = float(latest_prices[t])
-            exit_prices_dict[t] = exit_price
-            qty = float(pos["qty"])
-            nav_new += qty * exit_price
+            px = latest_prices[t]
+            qty = pos["qty"]
 
-        # Update tradelog rows with exit info & PnL
-        close_open_trades(exit_date_str=today_str, exit_prices=exit_prices_dict)
+            exit_prices_dict[t] = px
+            nav_new += qty * px
+            total_sell_fees += FEE_PER_TRADE  # one sell per ticker
 
-        # Update NAV and clear positions
+        # Deduct SELL fees from NAV
+        nav_new -= total_sell_fees
+
+        close_open_trades(today_str, exit_prices_dict)
+
         state["nav"] = float(nav_new)
         state["open_positions"] = {}
         state["planned_exit_date"] = None
 
-        print(f"Closed positions on {today_str}; new NAV: {state['nav']:.2f}")
+    # ============================================================
+    # ENTRY LOGIC
+    # ============================================================
 
-    # --------------------------------------------------------
-    # ENTRY LOGIC (equal-weight NAV on signal day, no open pos)
-    # --------------------------------------------------------
     if is_signal_day and not state["open_positions"]:
-        # Compute exit date (8th future trading day or last available)
+        # schedule for exit date (7 trading days later)
         oslo = mcal.get_calendar("XOSL")
-        schedule = oslo.schedule(
-            start_date=today,
-            end_date=today + pd.Timedelta(days=30)
-        )
+        schedule = oslo.schedule(start_date=today, end_date=today + pd.Timedelta(days=30))
         trading_days = schedule.index
 
-        # exit on the 7th trading day after the last day of the month
         if len(trading_days) > 7:
             exit_date = trading_days[7]
         else:
             exit_date = trading_days[-1]
 
-
         exit_date_str = exit_date.strftime("%Y-%m-%d")
 
-        # Use current NAV; if invalid, reset to initial NAV
-        nav_current = float(state.get("nav", 0.0))
-        if not np.isfinite(nav_current) or nav_current <= 0:
-            nav_current = float(state.get("initial_nav", INITIAL_NAV))
-            state["nav"] = nav_current
+        nav_current = state["nav"]
 
-        stake_per = nav_current / len(TOP6)
+        # Deduct BUY fees upfront (29 NOK per ticker)
+        total_buy_fees = len(TOP6) * FEE_PER_TRADE
+        nav_after_fees = nav_current - total_buy_fees
+        state["nav"] = nav_after_fees
 
-        # Use last available data date for entry prices
-        entry_date = last_data_date
-        entry_date_str = last_data_date_str
-        entry_prices_all = data.loc[entry_date].to_dict()
+        stake_per = nav_after_fees / len(TOP6)
 
+        entry_prices = data.loc[last_data_date].to_dict()
         open_positions = {}
 
         for t in TOP6:
-            price = float(entry_prices_all.get(t, np.nan))
-            if not np.isfinite(price) or price <= 0:
-                continue
-
-            qty = stake_per / price
+            px = entry_prices[t]
+            qty = stake_per / px
 
             open_positions[t] = {
                 "qty": qty,
-                "entry_price": price,
-                "entry_date": entry_date_str,
+                "entry_price": px,
+                "entry_date": last_data_date_str,
                 "stake_nok": stake_per
             }
 
             append_entry_trade(
-                ticker=t,
-                entry_date=entry_date_str,
-                entry_price=price,
-                qty=qty,
-                stake_nok=stake_per,
-                fees_nok=FEES_NOK
+                t,
+                last_data_date_str,
+                px,
+                qty,
+                stake_per
             )
 
-        if open_positions:
-            state["open_positions"] = open_positions
-            state["planned_exit_date"] = exit_date_str
-            state["last_signal_date"] = signal_date_str
-            # NAV becomes value of open positions at entry
-            state["nav"] = float(sum(
-                pos["qty"] * pos["entry_price"] for pos in open_positions.values()
-            ))
+        state["open_positions"] = open_positions
+        state["planned_exit_date"] = exit_date_str
+        state["last_signal_date"] = signal_date_str
 
-            print(f"Opened equal-weight positions on {entry_date_str}; NAV: {state['nav']:.2f}")
-            print(f"Planned exit date: {exit_date_str}")
+    # ============================================================
+    # UPDATE NAV DAILY
+    # ============================================================
 
-    # Save updated state
+    if state["open_positions"]:
+        nav_live = sum(
+            pos["qty"] * latest_prices[t] for t, pos in state["open_positions"].items()
+        )
+        state["nav"] = float(nav_live)
+
     save_state(state)
+    record_nav(today_str, state["nav"])
 
-    # --------------------------------------------------------
-    # BUILD JSON OBJECT FOR FRONTEND
-    # --------------------------------------------------------
-    base_obj = {
+    # ============================================================
+    # BUILD JSON FOR FRONTEND
+    # ============================================================
+
+    obj = {
         "date_generated": today_str,
         "tickers": TOP6,
         "data_last_date": last_data_date_str,
         "latest_prices": latest_prices,
         "signal_date": signal_date_str,
-        "is_signal_day": bool(is_signal_day),
-        "nav": float(state.get("nav", 0.0))
+        "is_signal_day": is_signal_day,
+        "nav": state["nav"]
     }
 
     if state["open_positions"]:
-        # Open positions exist: include entry info
-        sample_pos = next(iter(state["open_positions"].values()))
-        entry_date_str = sample_pos["entry_date"]
-        entry_prices_output = {
-            t: float(pos["entry_price"]) for t, pos in state["open_positions"].items()
-        }
-
-        base_obj.update({
+        obj.update({
             "status": "signal-open",
-            "entry_date": entry_date_str,
-            "exit_date": state.get("planned_exit_date"),
-            "entry_prices": entry_prices_output
+            "entry_date": next(iter(state["open_positions"].values()))["entry_date"],
+            "exit_date": state["planned_exit_date"],
+            "entry_prices": {t: pos["entry_price"] for t, pos in state["open_positions"].items()}
         })
     elif is_exit_day and exit_prices_dict:
-        # Positions were just closed today; include exit prices only
-        base_obj.update({
+        obj.update({
             "status": "signal-closed",
-            "entry_date": None,
             "exit_date": today_str,
-            "exit_prices": {
-                t: float(px) for t, px in exit_prices_dict.items()
-            }
+            "exit_prices": exit_prices_dict
         })
     else:
-        base_obj.setdefault("status", "no-signal")
-        base_obj.setdefault("message", "No positions entered today.")
+        obj.update({
+            "status": "no-signal",
+            "message": "No positions entered today."
+        })
 
-    save_json(base_obj, OUTPUT_PATH)
-    print(f"JSON written to {OUTPUT_PATH} with status: {base_obj['status']}")
+    save_json(obj, OUTPUT_PATH)
+    print(f"JSON updated: {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":
