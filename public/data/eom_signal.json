@@ -10,15 +10,25 @@
     ],
     "data_last_date": "2025-11-28",
     "latest_prices": {
-        "AUTO.OL": 11.020000457763672,
-        "BWE.OL": 36.95000076293945,
-        "CADLR.OL": 44.599998474121094,
-        "DNO.OL": 14.5,
-        "SOMA.OL": 18.260000228881836,
-        "VAR.OL": 31.670000076293945
+        "AUTO.OL": 11.0600004196167,
+        "BWE.OL": 37.0,
+        "CADLR.OL": 44.58000183105469,
+        "DNO.OL": 14.510000228881836,
+        "SOMA.OL": 18.200000762939453,
+        "VAR.OL": 31.6299991607666
     },
-    "signal_date": "2025-11-26",
-    "is_signal_day": false,
-    "status": "no-signal",
-    "message": "No positions entered today."
+    "signal_date": "2025-11-28",
+    "is_signal_day": true,
+    "nav": 100000.00000000001,
+    "status": "signal-open",
+    "entry_date": "2025-11-28",
+    "exit_date": "2025-12-09",
+    "entry_prices": {
+        "DNO.OL": 14.510000228881836,
+        "CADLR.OL": 44.58000183105469,
+        "SOMA.OL": 18.200000762939453,
+        "AUTO.OL": 11.0600004196167,
+        "BWE.OL": 37.0,
+        "VAR.OL": 31.6299991607666
+    }
 }
