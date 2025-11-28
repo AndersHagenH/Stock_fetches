@@ -10,7 +10,7 @@
     ],
     "data_last_date": "2025-11-28",
     "latest_prices": {
-        "AUTO.OL": 11.0600004196167,
+        "AUTO.OL": NaN,
         "BWE.OL": 37.0,
         "CADLR.OL": 44.58000183105469,
         "DNO.OL": 14.510000228881836,
@@ -19,7 +19,7 @@
     },
     "signal_date": "2025-11-28",
     "is_signal_day": true,
-    "nav": 100000.00000000001,
+    "nav": NaN,
     "status": "signal-open",
     "entry_date": "2025-11-28",
     "exit_date": "2025-12-09",
@@ -27,7 +27,7 @@
         "DNO.OL": 14.510000228881836,
         "CADLR.OL": 44.58000183105469,
         "SOMA.OL": 18.200000762939453,
-        "AUTO.OL": 11.0600004196167,
+        "AUTO.OL": NaN,
         "BWE.OL": 37.0,
         "VAR.OL": 31.6299991607666
     }
