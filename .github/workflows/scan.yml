@@ -2,7 +2,7 @@ name: Update 3-day scan
 
 on:
   schedule:
-    - cron: "0 * * * 1-5"   # every hour, Monday–Friday (UTC)
+    - cron: "*/20 * * * 1-5"   # every 20 minutes, Monday–Friday (UTC)
   workflow_dispatch:
 
 jobs:
