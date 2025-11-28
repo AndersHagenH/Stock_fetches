@@ -152,10 +152,12 @@ def compute_signal_dates(data):
         schedule = oslo.schedule(start_date=start, end_date=end)
         trading_days = schedule.index
 
-        if len(trading_days) >= 3:
-            signal_dates.append(trading_days[-3])
+        if len(trading_days) >= 1:
+            # last trading day of the month
+            signal_dates.append(trading_days[-1])
 
     return pd.DatetimeIndex(signal_dates)
+
 
 
 # ============================================================
