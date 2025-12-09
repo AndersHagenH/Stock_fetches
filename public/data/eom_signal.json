@@ -1,5 +1,5 @@
 {
-    "date_generated": "2025-12-08",
+    "date_generated": "2025-12-09",
     "tickers": [
         "DNO.OL",
         "CADLR.OL",
@@ -19,16 +19,15 @@
     },
     "signal_date": "2025-12-30",
     "is_signal_day": false,
-    "nav": 51942.478063997216,
-    "status": "signal-open",
-    "entry_date": "2025-11-28",
+    "nav": 51768.478063997216,
+    "status": "signal-closed",
     "exit_date": "2025-12-09",
-    "entry_prices": {
-        "DNO.OL": 14.510000228881836,
-        "CADLR.OL": 44.58000183105469,
-        "SOMA.OL": 18.200000762939453,
-        "AUTO.OL": 11.0600004196167,
-        "BWE.OL": 37.0,
-        "VAR.OL": 31.6299991607666
+    "exit_prices": {
+        "DNO.OL": 15.279999732971191,
+        "CADLR.OL": 47.15999984741211,
+        "SOMA.OL": 18.639999389648438,
+        "AUTO.OL": 11.510000228881836,
+        "BWE.OL": 39.20000076293945,
+        "VAR.OL": 32.25
     }
 }
