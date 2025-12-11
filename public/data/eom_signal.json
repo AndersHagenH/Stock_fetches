@@ -10,12 +10,12 @@
     ],
     "data_last_date": "2025-12-11",
     "latest_prices": {
-        "AUTO.OL": 11.229999542236328,
+        "AUTO.OL": 11.25,
         "BWE.OL": 38.54999923706055,
-        "CADLR.OL": 45.0,
-        "DNO.OL": 15.25,
-        "SOMA.OL": 18.84000015258789,
-        "VAR.OL": 31.84000015258789
+        "CADLR.OL": 44.900001525878906,
+        "DNO.OL": 15.289999961853027,
+        "SOMA.OL": NaN,
+        "VAR.OL": 31.920000076293945
     },
     "signal_date": "2025-12-30",
     "is_signal_day": false,
