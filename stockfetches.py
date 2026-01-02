@@ -14,7 +14,7 @@ import yfinance as yf
 # ===== PARAMETERS =====
 START_DATE = "2024-01-01"        # earliest date to fetch
 END_DATE: Optional[str] = None   # None = today
-USE_ADJUSTED = True             # True = adjusted close
+USE_ADJUSTED = False             # True = adjusted close
 
 # --- Updated buy/sell thresholds (aligned with your backtest concept) ---
 BAND_LOW = -0.03                 # -3%
