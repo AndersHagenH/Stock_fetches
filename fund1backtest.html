@@ -40,9 +40,8 @@
       font-size:.95rem;
     }
 
+    /* Header nav: only Home, right-aligned */
     nav{
-      display:flex;
-      gap:24px;
       font-size:.95rem;
     }
 
@@ -80,10 +79,10 @@
       white-space:nowrap;
     }
 
+    /* Text fills to the right edge (removed max-width) */
     p{
       color:var(--muted);
       font-size:1.05rem;
-      max-width:560px;
       margin:0;
     }
 
@@ -106,8 +105,6 @@
     <div class="logo">H<sup>2</sup> Investors</div>
     <nav>
       <a href="index.html">Home</a>
-      <a href="fund1backtest.html">Backtest</a>
-      <a href="#about">About</a>
     </nav>
   </header>
 
@@ -115,8 +112,8 @@
     <div class="eyebrow">Fund 1</div>
     <h1>Backtest of Strategy</h1>
     <p>
-      The Backtest uses the adjusted closing prices over the period from 01/01/2014 until today. It holds maximum 4 stocks 
-      at the same time and allocates 25% of NAV to each trade. Transaction costs are also accounted for. 
+      The Backtest uses the adjusted closing prices over the period from 01/01/2014 until today. It holds maximum 4 stocks
+      at the same time and allocates 25% of NAV to each trade. Transaction costs are also accounted for.
     </p>
   </section>
 
