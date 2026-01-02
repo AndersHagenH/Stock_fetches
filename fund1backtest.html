@@ -11,7 +11,6 @@
 
   <style>
     :root{
-      color-scheme: light;
       --bg-gradient: radial-gradient(circle at top, #0e1f4d 0%, #020817 50%, #010513 100%);
       --accent:#33e2a0;
       --text:#f8fbff;
@@ -40,11 +39,9 @@
       font-size:.95rem;
     }
 
-    /* Header nav */
     nav{
       display:flex;
-      align-items:center;
-      gap:18px;
+      gap:24px;
       font-size:.95rem;
     }
 
@@ -55,23 +52,6 @@
 
     nav a:hover{
       color:var(--text);
-    }
-
-    /* Fund button styling */
-    .fund-btn{
-      padding:6px 14px;
-      border-radius:999px;
-      border:1px solid rgba(51,226,160,.45);
-      background:rgba(51,226,160,.14);
-      color:var(--accent);
-      font-size:.78rem;
-      letter-spacing:.14em;
-      text-transform:uppercase;
-    }
-
-    .fund-btn:hover{
-      background:rgba(51,226,160,.22);
-      color:var(--accent);
     }
 
     .hero{
@@ -125,7 +105,7 @@
     <div class="logo">H<sup>2</sup> Investors</div>
     <nav>
       <a href="index.html">Home</a>
-      <a href="fund1.html" class="fund-btn">Fund 1</a>
+      <a href="fund1.html">Fund 1</a>
     </nav>
   </header>
 
