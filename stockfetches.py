@@ -6,6 +6,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 import os
+import json
 import numpy as np
 import pandas as pd
 import yfinance as yf
@@ -14,13 +15,20 @@ import yfinance as yf
 START_DATE = "2024-01-01"        # earliest date to fetch
 END_DATE: Optional[str] = None   # None = today
 USE_ADJUSTED = False             # True = adjusted close
-BAND_LOW = -0.04                 # -4%
-BAND_HIGH = -0.03                # -3% (inclusive)
-TARGET_PCT = 0.05                # +5% profit target
+
+# --- Updated buy/sell thresholds (aligned with your backtest concept) ---
+BAND_LOW = -0.03                 # -3%
+BAND_HIGH = -0.01                # -1% (inclusive)
+TARGET_PCT = 0.04                # +4% profit target
+
 LOOKBACK_SET = (1, 2, 3)         # rolling window lengths to test
 
 # For "Kode 1"-kompatibel eksport:
 LOOKBACK_DAYS_EXPORT = 3         # 3-dagers retur publiseres som 3D_Return
+
+# --- Portfolio concept (aligned with backtest) ---
+ALLOCATION_PCT = 0.25            # 25% of NAV per position
+MAX_POSITIONS_ALLOWED = int(1.0 / ALLOCATION_PCT)  # 4 positions
 # =======================
 
 # List of tickers (Oslo Stock Exchange)
@@ -70,8 +78,15 @@ def load_prices(tickers: List[str], start: str, end: Optional[str], use_adjusted
     return px
 
 # ---------- Trading logic ----------
-def _status_row(ticker: str, open_trade: Dict[str, Any] | None, date, status: str, last_price: float,
-                entry_price: float | None = None, exit_reason: str | None = None) -> Dict[str, Any]:
+def _status_row(
+    ticker: str,
+    open_trade: Dict[str, Any] | None,
+    date,
+    status: str,
+    last_price: float,
+    entry_price: float | None = None,
+    exit_reason: str | None = None
+) -> Dict[str, Any]:
     TARGET_P = TARGET_PCT
     entry_p = entry_price if entry_price is not None else (open_trade["entry_price"] if open_trade else None)
     entry_d = (open_trade["entry_date"] if open_trade else None)
@@ -183,29 +198,6 @@ def build_snapshot(price_df: pd.DataFrame) -> pd.DataFrame:
     snapshot_df = pd.DataFrame(rows).sort_values(["Status", "Ticker"])
     return snapshot_df
 
-# ---------- Main: produser Kode 1-kompatibel eksport ----------
-def main():
-    price_data = load_prices(TICKERS, START_DATE, END_DATE, USE_ADJUSTED)
-    price_data = price_data.dropna(how="all", axis=1)
-    if price_data.empty:
-        raise RuntimeError("No price data downloaded; check tickers or date range.")
-
-    snapshot_df = build_snapshot(price_data)
-
-    # 3-dagers retur (som i Kode 1)
-    three_day_rets = price_data.pct_change(LOOKBACK_DAYS_EXPORT).iloc[-1]
-    three_day_rets.name = "3D_Return"
-
-    # Slå sammen slik at vi kan eksportere de gamle feltene
-    out = snapshot_df.merge(
-        three_day_rets,
-        left_on="Ticker",
-        right_index=True,
-        how="left",
-    )
-
-import json
-
 # Kode 1 forventer Signal som BUY/HOLD; mapp fra Status
 def status_to_signal(status: str) -> str:
     if status == "BUY":
@@ -214,7 +206,7 @@ def status_to_signal(status: str) -> str:
         return "SELL"
     return "HOLD"
 
-
+# ---------- Main ----------
 def main():
     # ---- Load price data ----
     price_data = load_prices(TICKERS, START_DATE, END_DATE, USE_ADJUSTED)
@@ -230,8 +222,10 @@ def main():
         with open(portfolio_path, "r") as f:
             portfolio_state = json.load(f)
         real_positions = portfolio_state.get("positions", {})
+        cash = float(portfolio_state.get("cash", 0.0))
     else:
         real_positions = {}   # no positions yet
+        cash = 0.0
 
     # ---- Compute 3-day return ----
     three_day_rets = price_data.pct_change(LOOKBACK_DAYS_EXPORT).iloc[-1]
@@ -245,7 +239,25 @@ def main():
         how="left",
     )
 
-    # ---- Override signals using REAL portfolio P&L ----
+    # ---- Compute NAV and investable amount (portfolio concept) ----
+    # NAV = cash + sum(shares * last_price) across current holdings.
+    # invest_amount = min(cash, 0.25 * NAV)
+    last_price_map = dict(zip(out["Ticker"], out["LastPrice"]))
+
+    nav = cash
+    for tkr, pos in real_positions.items():
+        try:
+            shares = float(pos.get("shares", 0.0))
+            px = float(last_price_map.get(tkr, np.nan))
+            if shares > 0 and pd.notna(px):
+                nav += shares * px
+        except Exception:
+            pass
+
+    target_invest = nav * ALLOCATION_PCT
+    invest_amount = min(cash, target_invest)
+
+    # ---- Override signals using REAL portfolio P&L + capacity ----
     for idx, row in out.iterrows():
         ticker = row["Ticker"]
         last_price = row["LastPrice"]
@@ -253,19 +265,27 @@ def main():
         # If ticker is in portfolio → apply HOLD/SELL rules
         if ticker in real_positions:
             entry_price = float(real_positions[ticker]["entry_price"])
-            real_pl_pct = (last_price / entry_price - 1.0) if entry_price > 0 else 0
+            real_pl_pct = (last_price / entry_price - 1.0) if entry_price > 0 else 0.0
 
-            # Real SELL rule
-            if real_pl_pct >= 0.05:
+            # Real SELL rule (aligned with updated target)
+            if real_pl_pct >= TARGET_PCT:
                 out.at[idx, "Status"] = "SELL"
             else:
                 out.at[idx, "Status"] = "HOLD"
 
         # If not in portfolio:
         else:
-            # Keep BUY signal from model
+            # Keep BUY only if:
+            #  - model says BUY
+            #  - portfolio has capacity (< 4 positions)
+            #  - investable cash per rule (min(cash, 0.25*NAV)) is > 0
             if row["Status"] == "BUY":
-                continue
+                if len(real_positions) >= MAX_POSITIONS_ALLOWED:
+                    out.at[idx, "Status"] = "HOLD"
+                elif invest_amount <= 0:
+                    out.at[idx, "Status"] = "HOLD"
+                else:
+                    continue  # allowed BUY
             else:
                 out.at[idx, "Status"] = "HOLD"
 
@@ -290,7 +310,6 @@ def main():
     print("\n=== Export with REAL portfolio signals ===")
     print(out.head().to_string(index=False))
     print(f"Saved to:\n - {csv_path}\n - {json_path}")
-
 
 if __name__ == "__main__":
     main()
