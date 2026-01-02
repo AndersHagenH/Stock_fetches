@@ -53,10 +53,38 @@ jobs:
       - name: Run scanner
         run: python stockfetches.py
 
+      # --- NEW: notify Discord only if trade log changed ---
+      - name: Check if trade log changed
+        id: tradelog
+        run: |
+          TRADE_LOG="public/data/trade_log.csv"
+
+          if [ ! -f "$TRADE_LOG" ]; then
+            echo "Trade log not found at $TRADE_LOG; skipping Discord notify."
+            echo "changed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if git diff --quiet -- "$TRADE_LOG"; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify Discord (new trade)
+        if: steps.tradelog.outputs.changed == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_FUND1 }}
+        run: |
+          TRADE_LOG_URL="https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_REF_NAME}/public/data/trade_log.csv"
+          curl -H "Content-Type: application/json" \
+               -d "{\"content\":\"New trade logged. Updated trade log: ${TRADE_LOG_URL}\"}" \
+               "$DISCORD_WEBHOOK_URL"
+
       - name: Commit and push results
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-          git add public/data/scan_3day.json public/data/scan_3day.csv || true
+          git add public/data/scan_3day.json public/data/scan_3day.csv public/data/trade_log.csv || true
           git commit -m "update scan data" || echo "no changes"
           git push
