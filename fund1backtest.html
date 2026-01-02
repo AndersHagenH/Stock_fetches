@@ -40,8 +40,11 @@
       font-size:.95rem;
     }
 
-    /* Header nav: only Home, right-aligned */
+    /* Header nav */
     nav{
+      display:flex;
+      align-items:center;
+      gap:18px;
       font-size:.95rem;
     }
 
@@ -52,6 +55,23 @@
 
     nav a:hover{
       color:var(--text);
+    }
+
+    /* Fund button styling */
+    .fund-btn{
+      padding:6px 14px;
+      border-radius:999px;
+      border:1px solid rgba(51,226,160,.45);
+      background:rgba(51,226,160,.14);
+      color:var(--accent);
+      font-size:.78rem;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+    }
+
+    .fund-btn:hover{
+      background:rgba(51,226,160,.22);
+      color:var(--accent);
     }
 
     .hero{
@@ -79,7 +99,6 @@
       white-space:nowrap;
     }
 
-    /* Text fills to the right edge (removed max-width) */
     p{
       color:var(--muted);
       font-size:1.05rem;
@@ -101,10 +120,12 @@
 </head>
 
 <body>
+
   <header>
     <div class="logo">H<sup>2</sup> Investors</div>
     <nav>
       <a href="index.html">Home</a>
+      <a href="fund1.html" class="fund-btn">Fund 1</a>
     </nav>
   </header>
 
@@ -112,12 +133,12 @@
     <div class="eyebrow">Fund 1</div>
     <h1>Backtest of Strategy</h1>
     <p>
-      The Backtest uses the adjusted closing prices over the period from 01/01/2014 until today. It holds maximum 4 stocks
-      at the same time and allocates 25% of NAV to each trade. Transaction costs are also accounted for.
+      The Backtest uses the adjusted closing prices over the period from 01/01/2014 until today.
+      It holds maximum 4 stocks at the same time and allocates 25% of NAV to each trade.
+      Transaction costs are also accounted for.
     </p>
   </section>
 
-  <!-- BACKTEST IMAGE -->
   <section class="image-wrap">
     <img src="Fund1_backtest.png" alt="Fund 1 Backtest Performance">
   </section>
