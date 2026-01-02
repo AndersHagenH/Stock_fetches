@@ -2,8 +2,12 @@ name: Update 3-day scan
 
 on:
   schedule:
-    - cron: "*/20 * * * 1-5"   # every 20 minutes, Monday–Friday (UTC)
+    - cron: "*/15 * * * *"   # trigger every 15 minutes (UTC)
   workflow_dispatch:
+
+concurrency:
+  group: scan-3day
+  cancel-in-progress: true
 
 jobs:
   run-scan:
@@ -14,15 +18,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # --- Time filter: skip runs outside 08–18 Europe/Oslo ---
-      - name: Skip if outside 08–18 Europe/Oslo
+      # --- Time filter: only run at 08:00, 08:15, 08:30, 08:45 ... Oslo time, Mon–Fri, within 08–18 ---
+      - name: Skip if not on 15-min marks or outside 08–18 Europe/Oslo (Mon–Fri)
         run: |
+          dow=$(TZ=Europe/Oslo date +%u)   # 1=Mon ... 7=Sun
           hour=$(TZ=Europe/Oslo date +%H)
-          if [ "$hour" -lt 8 ] || [ "$hour" -gt 18 ]; then
+          min=$(TZ=Europe/Oslo date +%M)
+
+          # Only Mon–Fri
+          if [ "$dow" -gt 5 ]; then
+            echo "Weekend in Europe/Oslo; skipping."
+            exit 0
+          fi
+
+          # Only 08:00–17:59 (i.e., before 18:00)
+          if [ "$hour" -lt 8 ] || [ "$hour" -ge 18 ]; then
             echo "Outside 08–18 Europe/Oslo; skipping."
             exit 0
           fi
-          echo "Within allowed hours ($hour), continuing."
+
+          # Only at 00, 15, 30, 45
+          case "$min" in
+            00|15|30|45) echo "On 15-min mark ($hour:$min Oslo), continuing." ;;
+            *) echo "Not on a 15-min mark ($hour:$min Oslo); skipping."; exit 0 ;;
+          esac
 
       - uses: actions/setup-python@v5
         with:
