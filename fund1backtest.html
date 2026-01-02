@@ -62,7 +62,6 @@
 
     .eyebrow{
       display:inline-flex;
-      gap:8px;
       padding:6px 14px;
       border-radius:999px;
       background:rgba(51,226,160,.12);
@@ -87,6 +86,18 @@
       max-width:560px;
       margin:0;
     }
+
+    .image-wrap{
+      padding:40px 8vw 60px;
+    }
+
+    .image-wrap img{
+      width:100%;
+      max-width:1200px;
+      display:block;
+      margin:0 auto;
+      border-radius:14px;
+    }
   </style>
 </head>
 
@@ -103,11 +114,16 @@
   <section class="hero">
     <div class="eyebrow">Fund 1</div>
     <h1>Stock Picks &amp; Portfolio Tracker</h1>
-    <p>Mean-reverting strategy in a non-cyclical trading universe. Entry and exit based on a couple different threshold signals.</p>
+    <p>
+      Mean-reverting strategy in a non-cyclical trading universe.
+      Entry and exit based on a couple different threshold signals.
+    </p>
   </section>
 
-  <section id="about" style="padding:0 8vw 40px; color:var(--muted); font-size:.9rem;">
-    <!-- Backtest content will be added here later -->
+  <!-- BACKTEST IMAGE -->
+  <section class="image-wrap">
+    <img src="Fund1_backtest.png" alt="Fund 1 Backtest Performance">
   </section>
+
 </body>
 </html>
