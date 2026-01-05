@@ -26,8 +26,8 @@ PORTFOLIO_NAV_JSON = os.path.join(OUTPUT_DIR, "portfolio_nav.json")
 PORTFOLIO_SUMMARY_JSON = os.path.join(OUTPUT_DIR, "portfolio_summary.json")
 
 START_NAV_NOK = 50_000.0
-FEE_BUY = 29.0
-FEE_SELL = 29.0
+FEE_BUY = 19.0
+FEE_SELL = 19.0
 
 ALLOCATION_PCT = 0.25
 MAX_POSITIONS = int(1.0 / ALLOCATION_PCT)  # 4
