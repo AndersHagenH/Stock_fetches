@@ -1,10 +1,11 @@
 # portfolio_builder.py
 # Build a simple portfolio from signals produced by scan_3day.json.
-# Rules:
+# Updated rules (aligned with Stock_fetches.py concept):
 # - Start cash: 50,000 NOK (on first run)
 # - Fees: 29 NOK on BUY and 29 NOK on SELL
-# - Position size: 5,000 NOK per BUY (skip if cash < 5,029)
-# - Max concurrent positions: 10
+# - Max concurrent positions: 4 (25% allocation concept)
+# - Position size on BUY: min(cash - fee, 25% of NAV)
+#   - If cash < 25% of NAV, invest remaining cash (minus fee)
 # - Fractional shares allowed
 # - Transact at the LastPrice in scan_3day.json for that day
 # - SELL closes position, books P&L, appends to trade_log.csv
@@ -25,10 +26,11 @@ PORTFOLIO_NAV_JSON = os.path.join(OUTPUT_DIR, "portfolio_nav.json")
 PORTFOLIO_SUMMARY_JSON = os.path.join(OUTPUT_DIR, "portfolio_summary.json")
 
 START_NAV_NOK = 50_000.0
-STAKE_NOK = 5_000.0
 FEE_BUY = 29.0
 FEE_SELL = 29.0
-MAX_POSITIONS = 10
+
+ALLOCATION_PCT = 0.25
+MAX_POSITIONS = int(1.0 / ALLOCATION_PCT)  # 4
 
 # ====== IO HELPERS ======
 def _today_date(scan_rows) -> str:
@@ -55,7 +57,7 @@ def load_scan():
             continue
         rows.append({
             "Ticker": str(t),
-            "Status": str(s).upper(),
+            "Status": str(s).upper(),   # BUY / SELL / HOLD
             "LastPrice": float(p),
             "Date": r.get("Date"),
             "ExitReason": r.get("ExitReason")
@@ -68,7 +70,7 @@ def load_state():
             "cash": START_NAV_NOK,
             "positions": {},
             "max_slots": MAX_POSITIONS,
-            "stake_nok": STAKE_NOK,
+            "allocation_pct": ALLOCATION_PCT,
             "fee_buy": FEE_BUY,
             "fee_sell": FEE_SELL,
             "start_nav": START_NAV_NOK
@@ -76,7 +78,19 @@ def load_state():
         save_state(state)
         return state
     with open(STATE_JSON, "r", encoding="utf-8") as f:
-        return json.load(f)
+        state = json.load(f)
+
+    # Backward-compatible defaults if older state exists
+    state.setdefault("max_slots", MAX_POSITIONS)
+    state.setdefault("allocation_pct", ALLOCATION_PCT)
+    state.setdefault("fee_buy", FEE_BUY)
+    state.setdefault("fee_sell", FEE_SELL)
+    state.setdefault("start_nav", START_NAV_NOK)
+
+    # Force alignment with new concept
+    state["max_slots"] = MAX_POSITIONS
+    state["allocation_pct"] = ALLOCATION_PCT
+    return state
 
 def save_state(state):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -101,13 +115,12 @@ def read_portfolio_nav() -> pd.DataFrame:
             return pd.DataFrame(arr)
     return pd.DataFrame(columns=["date","nav"])
 
-# ✅ MODIFIED: write pl_pct to portfolio_nav.json
-def write_portfolio_nav(df: pd.DataFrame):
+def write_portfolio_nav(df: pd.DataFrame, start_nav: float):
     df = df.sort_values("date")
     out = []
     for _, row in df.iterrows():
         nav = float(row["nav"])
-        pl_pct = (nav - START_NAV_NOK) / START_NAV_NOK if START_NAV_NOK else 0.0
+        pl_pct = (nav - start_nav) / start_nav if start_nav else 0.0
         out.append({
             "date": row["date"],
             "nav": nav,
@@ -130,6 +143,13 @@ def write_portfolio_summary(date: str, nav: float, start_nav: float):
         json.dump(payload, f, indent=2)
 
 # ====== CORE ======
+def _compute_nav(state, by_ticker) -> float:
+    nav = float(state["cash"])
+    for ticker, pos in state["positions"].items():
+        px = by_ticker.get(ticker, {}).get("LastPrice", pos.get("entry_price", 0.0))
+        nav += float(pos["qty"]) * float(px)
+    return float(nav)
+
 def process_signals():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -138,11 +158,13 @@ def process_signals():
     trade_log = read_trade_log()
 
     today = _today_date(scan)
-
     by_ticker = {r["Ticker"]: r for r in scan}
 
     # 1) SELL
-    sell_candidates = [t for t, r in by_ticker.items() if r["Status"] == "SELL" and t in state["positions"]]
+    sell_candidates = [
+        t for t, r in by_ticker.items()
+        if r["Status"] == "SELL" and t in state["positions"]
+    ]
     for ticker in sorted(sell_candidates):
         pos = state["positions"][ticker]
         last_price = by_ticker[ticker]["LastPrice"]
@@ -150,7 +172,7 @@ def process_signals():
         proceeds = qty * last_price
         state["cash"] += proceeds - FEE_SELL
 
-        stake = float(pos["stake_nok"])
+        stake = float(pos.get("stake_nok", proceeds))  # stake_nok should exist; fallback just in case
         fees_total = FEE_BUY + FEE_SELL
         pl_nok = (proceeds - stake) - fees_total
         pl_pct = pl_nok / stake if stake != 0 else 0.0
@@ -179,36 +201,52 @@ def process_signals():
         trade_log = trade_log.drop_duplicates(subset=["Ticker","EntryDate","ExitDate"], keep="first")
         trade_log = trade_log.sort_values(["Ticker","EntryDate","ExitDate"]).reset_index(drop=True)
 
-    # 2) BUY
+    # 2) BUY (25% of NAV allocation concept)
     current_slots = len(state["positions"])
     free_slots = max(0, state["max_slots"] - current_slots)
-    buy_candidates = [t for t, r in by_ticker.items() if r["Status"] == "BUY" and t not in state["positions"]]
-    buy_candidates = sorted(buy_candidates)
+    buy_candidates = sorted([
+        t for t, r in by_ticker.items()
+        if r["Status"] == "BUY" and t not in state["positions"]
+    ])
 
     for ticker in buy_candidates:
         if free_slots <= 0:
             break
-        if state["cash"] < (STAKE_NOK + FEE_BUY):
-            continue
+
         last_price = by_ticker[ticker]["LastPrice"]
         if last_price <= 0:
             continue
-        qty = STAKE_NOK / last_price
 
-        state["cash"] -= (STAKE_NOK + FEE_BUY)
+        # Need at least the fee + something to invest
+        if state["cash"] <= FEE_BUY:
+            continue
+
+        # NAV is computed using current holdings at today's prices
+        nav_now = _compute_nav(state, by_ticker)
+
+        target_invest = float(state["allocation_pct"]) * nav_now  # 25% of NAV
+        investable_cash = float(state["cash"]) - FEE_BUY          # leave room for fee
+        stake_nok = min(investable_cash, target_invest)
+
+        # If stake becomes too small (e.g., cash barely covers fee), skip
+        if stake_nok <= 0:
+            continue
+
+        qty = stake_nok / last_price
+
+        # Book the buy: reduce cash by stake + fee
+        state["cash"] -= (stake_nok + FEE_BUY)
+
         state["positions"][ticker] = {
             "qty": float(qty),
             "entry_price": float(last_price),
             "entry_date": today,
-            "stake_nok": float(STAKE_NOK)
+            "stake_nok": float(stake_nok)
         }
         free_slots -= 1
 
     # 3) NAV
-    nav = float(state["cash"])
-    for ticker, pos in state["positions"].items():
-        px = by_ticker.get(ticker, {}).get("LastPrice", pos["entry_price"])
-        nav += float(pos["qty"]) * float(px)
+    nav = _compute_nav(state, by_ticker)
 
     # 4) NAV log
     nav_df = read_portfolio_nav()
@@ -221,14 +259,14 @@ def process_signals():
     # 5) Save
     save_state(state)
     write_trade_log(trade_log)
-    write_portfolio_nav(nav_df)
-    write_portfolio_summary(today, nav, state["start_nav"])
+    write_portfolio_nav(nav_df, start_nav=float(state["start_nav"]))
+    write_portfolio_summary(today, nav, float(state["start_nav"]))
 
     print(f"[{today}] NAV: {nav:,.2f} NOK | Cash: {state['cash']:,.2f} NOK | Positions: {len(state['positions'])}")
     if state["positions"]:
         print(" Open positions:")
         for t, p in sorted(state["positions"].items()):
-            print(f"  - {t}: qty={p['qty']:.6f}, entry={p['entry_price']:.4f} ({p['entry_date']})")
+            print(f"  - {t}: qty={p['qty']:.6f}, entry={p['entry_price']:.4f} ({p['entry_date']}), stake={p['stake_nok']:.2f}")
 
 if __name__ == "__main__":
     process_signals()
