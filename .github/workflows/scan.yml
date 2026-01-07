@@ -18,8 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # --- Time filter: only run at 08:00, 08:15, 08:30, 08:45 ... Oslo time, Mon–Fri, within 08–18 ---
-      - name: Skip if not on 15-min marks or outside 08–18 Europe/Oslo (Mon–Fri)
+      # --- Time filter: only run at ~08:00, ~08:15, ~08:30, ~08:45 ... Oslo time, Mon–Fri, within 08–18 ---
+      - name: Skip if not within 15-min tolerance or outside 08–18 Europe/Oslo (Mon–Fri)
         run: |
           dow=$(TZ=Europe/Oslo date +%u)   # 1=Mon ... 7=Sun
           hour=$(TZ=Europe/Oslo date +%H)
@@ -37,11 +37,21 @@ jobs:
             exit 0
           fi
 
-          # Only at 00, 15, 30, 45
-          case "$min" in
-            00|15|30|45) echo "On 15-min mark ($hour:$min Oslo), continuing." ;;
-            *) echo "Not on a 15-min mark ($hour:$min Oslo); skipping."; exit 0 ;;
-          esac
+          # Allow tolerance windows: 00–02, 15–17, 30–32, 45–47
+          min_i=$((10#$min))  # safe parse (handles leading zeros)
+
+          if   [ "$min_i" -ge 0  ] && [ "$min_i" -le 2  ]; then
+            echo "Within 00–02 window ($hour:$min Oslo), continuing."
+          elif [ "$min_i" -ge 15 ] && [ "$min_i" -le 17 ]; then
+            echo "Within 15–17 window ($hour:$min Oslo), continuing."
+          elif [ "$min_i" -ge 30 ] && [ "$min_i" -le 32 ]; then
+            echo "Within 30–32 window ($hour:$min Oslo), continuing."
+          elif [ "$min_i" -ge 45 ] && [ "$min_i" -le 47 ]; then
+            echo "Within 45–47 window ($hour:$min Oslo), continuing."
+          else
+            echo "Not within tolerance windows ($hour:$min Oslo); skipping."
+            exit 0
+          fi
 
       - uses: actions/setup-python@v5
         with:
@@ -53,7 +63,7 @@ jobs:
       - name: Run scanner
         run: python stockfetches.py
 
-      # --- NEW: notify Discord only if trade log changed ---
+      # --- notify Discord only if trade log changed ---
       - name: Check if trade log changed
         id: tradelog
         run: |
