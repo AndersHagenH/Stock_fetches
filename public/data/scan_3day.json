@@ -1,100 +1,100 @@
 [
   {
     "Ticker":"KID.OL",
-    "3D_Return":-0.037593985,
+    "3D_Return":-0.0360902485,
     "Signal":"HOLD",
-    "LastPrice":128.0,
-    "Date":"2026-01-12 10:19 UTC"
+    "LastPrice":128.199997,
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"GJF.OL",
-    "3D_Return":-0.0274160395,
+    "3D_Return":-0.0294721588,
     "Signal":"HOLD",
-    "LastPrice":283.799988,
-    "Date":"2026-01-12 10:19 UTC"
+    "LastPrice":283.200012,
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"MORG.OL",
     "3D_Return":-0.0208981497,
     "Signal":"HOLD",
     "LastPrice":113.379997,
-    "Date":"2026-01-12 10:19 UTC"
-  },
-  {
-    "Ticker":"AFG.OL",
-    "3D_Return":-0.0182013335,
-    "Signal":"HOLD",
-    "LastPrice":183.399994,
-    "Date":"2026-01-12 10:19 UTC"
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"NONG.OL",
-    "3D_Return":-0.0164153657,
+    "3D_Return":-0.0169491077,
     "Signal":"HOLD",
-    "LastPrice":147.399994,
-    "Date":"2026-01-12 10:19 UTC"
+    "LastPrice":147.320007,
+    "Date":"2026-01-12 10:49 UTC"
+  },
+  {
+    "Ticker":"AFG.OL",
+    "3D_Return":-0.013918662,
+    "Signal":"HOLD",
+    "LastPrice":184.199997,
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"VEI.OL",
     "3D_Return":-0.0099227555,
     "Signal":"HOLD",
     "LastPrice":179.600006,
-    "Date":"2026-01-12 10:19 UTC"
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"PROT.OL",
     "3D_Return":-0.0095602294,
     "Signal":"HOLD",
     "LastPrice":518.0,
-    "Date":"2026-01-12 10:19 UTC"
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"STB.OL",
-    "3D_Return":-0.0064858848,
+    "3D_Return":-0.0058962262,
     "Signal":"HOLD",
-    "LastPrice":168.5,
-    "Date":"2026-01-12 10:19 UTC"
+    "LastPrice":168.600006,
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"DNB.OL",
-    "3D_Return":-0.0046930967,
+    "3D_Return":-0.004332174,
     "Signal":"HOLD",
-    "LastPrice":275.700012,
-    "Date":"2026-01-12 10:19 UTC"
+    "LastPrice":275.799988,
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"SBNOR.OL",
-    "3D_Return":-0.0042553354,
+    "3D_Return":-0.0008510833,
     "Signal":"HOLD",
-    "LastPrice":187.199997,
-    "Date":"2026-01-12 10:19 UTC"
+    "LastPrice":187.839996,
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"EPR.OL",
-    "3D_Return":-0.0032085888,
+    "3D_Return":0.0,
     "Signal":"HOLD",
-    "LastPrice":93.199997,
-    "Date":"2026-01-12 10:19 UTC"
+    "LastPrice":93.5,
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"MING.OL",
-    "3D_Return":0.0024440479,
+    "3D_Return":0.00173122,
     "Signal":"HOLD",
-    "LastPrice":196.880005,
-    "Date":"2026-01-12 10:19 UTC"
+    "LastPrice":196.740005,
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"SB1NO.OL",
     "3D_Return":0.0041884977,
     "Signal":"HOLD",
     "LastPrice":191.800003,
-    "Date":"2026-01-12 10:19 UTC"
+    "Date":"2026-01-12 10:49 UTC"
   },
   {
     "Ticker":"ORK.OL",
-    "3D_Return":0.0237442783,
+    "3D_Return":0.0228310502,
     "Signal":"HOLD",
-    "LastPrice":112.099998,
-    "Date":"2026-01-12 10:19 UTC"
+    "LastPrice":112.0,
+    "Date":"2026-01-12 10:49 UTC"
   }
 ]
