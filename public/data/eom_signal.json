@@ -1,5 +1,5 @@
 {
-    "date_generated": "2026-01-19",
+    "date_generated": "2026-01-20",
     "tickers": [
         "DNO.OL",
         "CADLR.OL",
@@ -15,7 +15,7 @@
         "CADLR.OL": 53.20000076293945,
         "DNO.OL": 16.059999465942383,
         "SOMA.OL": 19.600000381469727,
-        "VAR.OL": 34.560001373291016
+        "VAR.OL": NaN
     },
     "signal_date": "2026-01-30",
     "is_signal_day": false,
