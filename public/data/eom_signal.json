@@ -10,16 +10,16 @@
     ],
     "data_last_date": "2026-01-30",
     "latest_prices": {
-        "AUTO.OL": 11.279999732971191,
+        "AUTO.OL": 11.289999961853027,
         "BWE.OL": 46.20000076293945,
-        "CADLR.OL": 57.75,
-        "DNO.OL": 16.059999465942383,
-        "SOMA.OL": 21.549999237060547,
-        "VAR.OL": 34.77000045776367
+        "CADLR.OL": NaN,
+        "DNO.OL": 15.970000267028809,
+        "SOMA.OL": 21.600000381469727,
+        "VAR.OL": 34.650001525878906
     },
     "signal_date": "2026-01-30",
     "is_signal_day": true,
-    "nav": 52357.05131771226,
+    "nav": NaN,
     "status": "signal-open",
     "entry_date": "2026-01-29",
     "exit_date": "2026-02-10",
