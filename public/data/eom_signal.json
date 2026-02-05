@@ -15,11 +15,11 @@
         "CADLR.OL": 57.25,
         "DNO.OL": 15.699999809265137,
         "SOMA.OL": 21.649999618530273,
-        "VAR.OL": NaN
+        "VAR.OL": 33.810001373291016
     },
     "signal_date": "2026-02-27",
     "is_signal_day": false,
-    "nav": NaN,
+    "nav": 51060.22879841681,
     "status": "signal-open",
     "entry_date": "2026-01-29",
     "exit_date": "2026-02-10",
