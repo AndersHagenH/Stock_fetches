@@ -1,5 +1,5 @@
 {
-    "date_generated": "2026-04-09",
+    "date_generated": "2026-04-10",
     "tickers": [
         "DNO.OL",
         "CADLR.OL",
@@ -10,16 +10,16 @@
     ],
     "data_last_date": "2026-04-09",
     "latest_prices": {
-        "AUTO.OL": NaN,
-        "BWE.OL": NaN,
-        "CADLR.OL": NaN,
-        "DNO.OL": NaN,
+        "AUTO.OL": 9.78499984741211,
+        "BWE.OL": 57.20000076293945,
+        "CADLR.OL": 61.400001525878906,
+        "DNO.OL": 19.350000381469727,
         "SOMA.OL": 29.100000381469727,
-        "VAR.OL": NaN
+        "VAR.OL": 46.060001373291016
     },
     "signal_date": "2026-04-30",
     "is_signal_day": false,
-    "nav": NaN,
+    "nav": 52627.201114505806,
     "status": "signal-open",
     "entry_date": "2026-03-30",
     "exit_date": "2026-04-14",
