@@ -20,14 +20,6 @@
     "signal_date": "2026-04-30",
     "is_signal_day": false,
     "nav": 53167.42145692646,
-    "status": "signal-closed",
-    "exit_date": "2026-04-14",
-    "exit_prices": {
-        "DNO.OL": 19.459999084472656,
-        "CADLR.OL": 61.54999923706055,
-        "SOMA.OL": 29.5,
-        "AUTO.OL": 9.984999656677246,
-        "BWE.OL": 59.0,
-        "VAR.OL": 46.459999084472656
-    }
+    "status": "no-signal",
+    "message": "No positions entered today."
 }
