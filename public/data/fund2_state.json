@@ -1,7 +1,44 @@
 {
     "initial_nav": 50000.0,
-    "nav": 53167.42145692646,
-    "open_positions": {},
-    "planned_exit_date": null,
+    "nav": 52993.42145692646,
+    "open_positions": {
+        "DNO.OL": {
+            "qty": 447.8822118166355,
+            "entry_price": 19.719999313354492,
+            "entry_date": "2026-04-29",
+            "stake_nok": 8832.236909487743
+        },
+        "CADLR.OL": {
+            "qty": 137.573790176474,
+            "entry_price": 64.19999694824219,
+            "entry_date": "2026-04-29",
+            "stake_nok": 8832.236909487743
+        },
+        "SOMA.OL": {
+            "qty": 307.20824033000844,
+            "entry_price": 28.75,
+            "entry_date": "2026-04-29",
+            "stake_nok": 8832.236909487743
+        },
+        "AUTO.OL": {
+            "qty": 744.0806229689143,
+            "entry_price": 11.869999885559082,
+            "entry_date": "2026-04-29",
+            "stake_nok": 8832.236909487743
+        },
+        "BWE.OL": {
+            "qty": 154.4097341203228,
+            "entry_price": 57.20000076293945,
+            "entry_date": "2026-04-29",
+            "stake_nok": 8832.236909487743
+        },
+        "VAR.OL": {
+            "qty": 190.9672845294647,
+            "entry_price": 46.25,
+            "entry_date": "2026-04-29",
+            "stake_nok": 8832.236909487743
+        }
+    },
+    "planned_exit_date": "2026-05-12",
     "last_signal_date": null
 }
