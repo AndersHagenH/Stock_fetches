@@ -4,97 +4,97 @@
     "3D_Return":0.0078707245,
     "Signal":"HOLD",
     "LastPrice":189.520004,
-    "Date":"2026-05-18 22:37 UTC"
+    "Date":"2026-05-18 23:43 UTC"
   },
   {
     "Ticker":"DNB.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":280.5,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"AFG.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":179.399994,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"MING.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":186.940002,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"MORG.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":112.940002,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"PROT.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":453.0,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"EPR.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":90.599998,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"GJF.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":251.399994,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"KID.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":116.0,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"NONG.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":143.520004,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"ORK.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":111.0,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"SB1NO.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":188.0,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"STB.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":178.199997,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   },
   {
     "Ticker":"VEI.OL",
     "3D_Return":null,
     "Signal":"HOLD",
     "LastPrice":174.600006,
-    "Date":"2026-05-15 22:37 UTC"
+    "Date":"2026-05-15 23:43 UTC"
   }
 ]
