@@ -1,5 +1,5 @@
 {
-    "date_generated": "2026-06-29",
+    "date_generated": "2026-06-30",
     "tickers": [
         "DNO.OL",
         "CADLR.OL",
@@ -18,8 +18,17 @@
         "VAR.OL": NaN
     },
     "signal_date": "2026-06-30",
-    "is_signal_day": false,
+    "is_signal_day": true,
     "nav": NaN,
-    "status": "no-signal",
-    "message": "No positions entered today."
+    "status": "signal-open",
+    "entry_date": "2026-06-29",
+    "exit_date": "2026-07-09",
+    "entry_prices": {
+        "DNO.OL": NaN,
+        "CADLR.OL": NaN,
+        "SOMA.OL": NaN,
+        "AUTO.OL": NaN,
+        "BWE.OL": NaN,
+        "VAR.OL": NaN
+    }
 }

@@ -1,7 +1,44 @@
 {
     "initial_nav": 50000.0,
     "nav": NaN,
-    "open_positions": {},
-    "planned_exit_date": null,
+    "open_positions": {
+        "DNO.OL": {
+            "qty": NaN,
+            "entry_price": NaN,
+            "entry_date": "2026-06-29",
+            "stake_nok": NaN
+        },
+        "CADLR.OL": {
+            "qty": NaN,
+            "entry_price": NaN,
+            "entry_date": "2026-06-29",
+            "stake_nok": NaN
+        },
+        "SOMA.OL": {
+            "qty": NaN,
+            "entry_price": NaN,
+            "entry_date": "2026-06-29",
+            "stake_nok": NaN
+        },
+        "AUTO.OL": {
+            "qty": NaN,
+            "entry_price": NaN,
+            "entry_date": "2026-06-29",
+            "stake_nok": NaN
+        },
+        "BWE.OL": {
+            "qty": NaN,
+            "entry_price": NaN,
+            "entry_date": "2026-06-29",
+            "stake_nok": NaN
+        },
+        "VAR.OL": {
+            "qty": NaN,
+            "entry_price": NaN,
+            "entry_date": "2026-06-29",
+            "stake_nok": NaN
+        }
+    },
+    "planned_exit_date": "2026-07-09",
     "last_signal_date": null
 }
