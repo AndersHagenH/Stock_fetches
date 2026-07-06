@@ -10,12 +10,12 @@
     ],
     "data_last_date": "2026-07-06",
     "latest_prices": {
-        "AUTO.OL": 12.289999961853027,
-        "BWE.OL": 49.45000076293945,
-        "CADLR.OL": 58.0,
-        "DNO.OL": 16.079999923706055,
-        "SOMA.OL": 25.700000762939453,
-        "VAR.OL": 40.869998931884766
+        "AUTO.OL": NaN,
+        "BWE.OL": NaN,
+        "CADLR.OL": NaN,
+        "DNO.OL": NaN,
+        "SOMA.OL": NaN,
+        "VAR.OL": NaN
     },
     "signal_date": "2026-07-31",
     "is_signal_day": false,
