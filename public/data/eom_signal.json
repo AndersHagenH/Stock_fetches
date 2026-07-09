@@ -20,14 +20,6 @@
     "signal_date": "2026-07-31",
     "is_signal_day": false,
     "nav": NaN,
-    "status": "signal-closed",
-    "exit_date": "2026-07-09",
-    "exit_prices": {
-        "DNO.OL": NaN,
-        "CADLR.OL": NaN,
-        "SOMA.OL": NaN,
-        "AUTO.OL": NaN,
-        "BWE.OL": NaN,
-        "VAR.OL": NaN
-    }
+    "status": "no-signal",
+    "message": "No positions entered today."
 }
