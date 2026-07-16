@@ -1,100 +1,100 @@
 [
   {
-    "Ticker":"AFG.OL",
-    "3D_Return":-0.0221328425,
-    "Signal":"HOLD",
-    "LastPrice":194.399994,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
     "Ticker":"PROT.OL",
-    "3D_Return":-0.0137818968,
+    "3D_Return":-0.0217829529,
     "Signal":"HOLD",
-    "LastPrice":486.600006,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"NONG.OL",
-    "3D_Return":-0.0104047674,
-    "Signal":"HOLD",
-    "LastPrice":155.979996,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"DNB.OL",
-    "3D_Return":-0.0063587482,
-    "Signal":"HOLD",
-    "LastPrice":296.899994,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"VEI.OL",
-    "3D_Return":-0.0052854123,
-    "Signal":"HOLD",
-    "LastPrice":188.199997,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"SBNOR.OL",
-    "3D_Return":0.0002069832,
-    "Signal":"HOLD",
-    "LastPrice":193.259995,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"MING.OL",
-    "3D_Return":0.0010262569,
-    "Signal":"HOLD",
-    "LastPrice":195.080002,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"ORK.OL",
-    "3D_Return":0.0018921909,
-    "Signal":"HOLD",
-    "LastPrice":105.900002,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"GJF.OL",
-    "3D_Return":0.0110375281,
-    "Signal":"HOLD",
-    "LastPrice":274.799988,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"SB1NO.OL",
-    "3D_Return":0.0172413793,
-    "Signal":"HOLD",
-    "LastPrice":206.5,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"KID.OL",
-    "3D_Return":0.0173776035,
-    "Signal":"HOLD",
-    "LastPrice":128.800003,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"EPR.OL",
-    "3D_Return":0.0197045094,
-    "Signal":"HOLD",
-    "LastPrice":82.800003,
-    "Date":"2026-07-16 08:31 UTC"
-  },
-  {
-    "Ticker":"STB.OL",
-    "3D_Return":0.0532765059,
-    "Signal":"HOLD",
-    "LastPrice":197.699997,
-    "Date":"2026-07-16 08:31 UTC"
+    "LastPrice":485.0,
+    "Date":"2026-07-16 10:33 UTC"
   },
   {
     "Ticker":"MORG.OL",
-    "3D_Return":null,
+    "3D_Return":-0.0119153152,
     "Signal":"HOLD",
-    "LastPrice":111.0,
-    "Date":"2026-07-14 08:31 UTC"
+    "LastPrice":111.120003,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"AFG.OL",
+    "3D_Return":-0.0112016141,
+    "Signal":"HOLD",
+    "LastPrice":194.199997,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"GJF.OL",
+    "3D_Return":-0.009366016,
+    "Signal":"HOLD",
+    "LastPrice":275.0,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"NONG.OL",
+    "3D_Return":-0.0092722384,
+    "Signal":"HOLD",
+    "LastPrice":156.0,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"DNB.OL",
+    "3D_Return":-0.0060301099,
+    "Signal":"HOLD",
+    "LastPrice":296.700012,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"SBNOR.OL",
+    "3D_Return":-0.0001031212,
+    "Signal":"HOLD",
+    "LastPrice":193.820007,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"VEI.OL",
+    "3D_Return":0.0,
+    "Signal":"HOLD",
+    "LastPrice":188.199997,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"ORK.OL",
+    "3D_Return":0.0,
+    "Signal":"HOLD",
+    "LastPrice":105.800003,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"MING.OL",
+    "3D_Return":0.0002047158,
+    "Signal":"HOLD",
+    "LastPrice":195.399994,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"KID.OL",
+    "3D_Return":0.0109717989,
+    "Signal":"HOLD",
+    "LastPrice":129.0,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"SB1NO.OL",
+    "3D_Return":0.012254902,
+    "Signal":"HOLD",
+    "LastPrice":206.5,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"EPR.OL",
+    "3D_Return":0.0222771702,
+    "Signal":"HOLD",
+    "LastPrice":82.599998,
+    "Date":"2026-07-16 10:33 UTC"
+  },
+  {
+    "Ticker":"STB.OL",
+    "3D_Return":0.0487546216,
+    "Signal":"HOLD",
+    "LastPrice":197.899994,
+    "Date":"2026-07-16 10:33 UTC"
   }
 ]
