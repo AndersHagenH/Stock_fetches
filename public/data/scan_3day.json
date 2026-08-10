@@ -1,100 +1,100 @@
 [
   {
-    "Ticker":"SBNOR.OL",
-    "3D_Return":-0.0262021945,
-    "Signal":"HOLD",
-    "LastPrice":194.0,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
     "Ticker":"SB1NO.OL",
-    "3D_Return":-0.0211267606,
+    "3D_Return":-0.0046838407,
     "Signal":"HOLD",
-    "LastPrice":208.5,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"ORK.OL",
-    "3D_Return":-0.0141643057,
-    "Signal":"HOLD",
-    "LastPrice":104.400002,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"MING.OL",
-    "3D_Return":-0.0135392487,
-    "Signal":"HOLD",
-    "LastPrice":196.720001,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"NONG.OL",
-    "3D_Return":-0.0114149981,
-    "Signal":"HOLD",
-    "LastPrice":157.619995,
-    "Date":"2026-08-10 21:43 UTC"
+    "LastPrice":212.5,
+    "Date":"2026-08-07 22:19 UTC"
   },
   {
     "Ticker":"PROT.OL",
-    "3D_Return":-0.0102459016,
+    "3D_Return":-0.0036749445,
     "Signal":"HOLD",
-    "LastPrice":483.0,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"VEI.OL",
-    "3D_Return":-0.0085288169,
-    "Signal":"HOLD",
-    "LastPrice":186.0,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"MORG.OL",
-    "3D_Return":-0.0066284295,
-    "Signal":"HOLD",
-    "LastPrice":110.900002,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"GJF.OL",
-    "3D_Return":-0.0064012028,
-    "Signal":"HOLD",
-    "LastPrice":279.399994,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"EPR.OL",
-    "3D_Return":-0.0034641504,
-    "Signal":"HOLD",
-    "LastPrice":86.300003,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"KID.OL",
-    "3D_Return":-0.0015360749,
-    "Signal":"HOLD",
-    "LastPrice":130.0,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"DNB.OL",
-    "3D_Return":0.0019640134,
-    "Signal":"HOLD",
-    "LastPrice":306.100006,
-    "Date":"2026-08-10 21:43 UTC"
-  },
-  {
-    "Ticker":"STB.OL",
-    "3D_Return":0.0039215836,
-    "Signal":"HOLD",
-    "LastPrice":204.800003,
-    "Date":"2026-08-10 21:43 UTC"
+    "LastPrice":488.0,
+    "Date":"2026-08-07 22:19 UTC"
   },
   {
     "Ticker":"AFG.OL",
-    "3D_Return":0.0065359309,
+    "3D_Return":-0.0021367196,
     "Signal":"HOLD",
-    "LastPrice":184.800003,
-    "Date":"2026-08-10 21:43 UTC"
+    "LastPrice":186.800003,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"SBNOR.OL",
+    "3D_Return":-0.0019045954,
+    "Signal":"HOLD",
+    "LastPrice":199.139999,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"NONG.OL",
+    "3D_Return":-0.0012501372,
+    "Signal":"HOLD",
+    "LastPrice":159.779999,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"DNB.OL",
+    "3D_Return":0.0016249593,
+    "Signal":"HOLD",
+    "LastPrice":308.200012,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"ORK.OL",
+    "3D_Return":0.0028571719,
+    "Signal":"HOLD",
+    "LastPrice":105.300003,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"GJF.OL",
+    "3D_Return":0.0042403258,
+    "Signal":"HOLD",
+    "LastPrice":284.200012,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"MORG.OL",
+    "3D_Return":0.0105943646,
+    "Signal":"HOLD",
+    "LastPrice":112.559998,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"VEI.OL",
+    "3D_Return":0.0107181133,
+    "Signal":"HOLD",
+    "LastPrice":188.600006,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"MING.OL",
+    "3D_Return":0.0112105155,
+    "Signal":"HOLD",
+    "LastPrice":201.149994,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"EPR.OL",
+    "3D_Return":0.0187573085,
+    "Signal":"HOLD",
+    "LastPrice":86.900002,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"STB.OL",
+    "3D_Return":0.0187932894,
+    "Signal":"HOLD",
+    "LastPrice":206.0,
+    "Date":"2026-08-07 22:19 UTC"
+  },
+  {
+    "Ticker":"KID.OL",
+    "3D_Return":0.0216048431,
+    "Signal":"HOLD",
+    "LastPrice":132.399994,
+    "Date":"2026-08-07 22:19 UTC"
   }
 ]
